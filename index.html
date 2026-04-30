@@ -555,6 +555,7 @@
         <div class="nav-label">Attendance</div>
         <div class="nav-item" onclick="showPage('attendance')"><span class="icon">📋</span> Student Attendance</div>
         <div class="nav-item" onclick="showPage('staffattendance')"><span class="icon">🕐</span> Staff Attendance</div>
+        <div class="nav-item" onclick="showPage('visitors')"><span class="icon">🪪</span> Visitor Sign-In</div>
       </div>
       <div class="nav-section">
         <div class="nav-label">Documents</div>
@@ -1010,6 +1011,106 @@
         <!-- Staff cards grid -->
         <div style="padding:24px 32px;">
           <div id="staffSignInList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
+        </div>
+      </div>
+
+      <!-- VISITOR ADMIN PAGE -->
+      <div class="page" id="page-visitors">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h2>🪪 Visitor Sign-In</h2>
+            <p>Track all visitors to the school. Generate a kiosk link for the reception desk.</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="generateVisitorKioskLink()">🔗 Reception Kiosk Link</button>
+            <button class="btn btn-secondary btn-sm" onclick="requirePasswordThen(exportVisitorExcel,'Visitor Log Excel')">📊 Export Excel</button>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:20px;">
+          <div class="stat-card"><div class="stat-value" id="visOnsite" style="font-family:'Space Grotesk',sans-serif;">0</div><div class="stat-label">Currently Onsite</div></div>
+          <div class="stat-card"><div class="stat-value" id="visTodayTotal" style="font-family:'Space Grotesk',sans-serif;">0</div><div class="stat-label">Visitors Today</div></div>
+          <div class="stat-card"><div class="stat-value" id="visWeekTotal" style="font-family:'Space Grotesk',sans-serif;">0</div><div class="stat-label">This Week</div></div>
+          <div class="stat-card"><div class="stat-value" id="visMonthTotal" style="font-family:'Space Grotesk',sans-serif;">0</div><div class="stat-label">This Month</div></div>
+        </div>
+
+        <!-- Date filter -->
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end;">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;">Date</label>
+            <input type="date" id="visDate" onchange="renderVisitorLog()" style="padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+          </div>
+          <input type="text" id="visSearch" oninput="renderVisitorLog()" placeholder="Search by name or purpose..." style="flex:1;min-width:200px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+        </div>
+
+        <div id="visitorLogTable"></div>
+      </div>
+
+      <!-- VISITOR KIOSK PAGE -->
+      <div class="page" id="page-visitorkiosk" style="background:var(--bg);min-height:100vh;padding:0;">
+        <!-- Kiosk Header -->
+        <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:48px;height:48px;background:rgba(255,255,255,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;">🪪</div>
+            <div>
+              <div id="visKioskSchool" style="font-size:18px;font-weight:800;color:#fff;"></div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.55);margin-top:2px;">Visitor Sign-In Register</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div id="visKioskClock" style="font-family:'Space Grotesk',sans-serif;font-size:40px;font-weight:800;color:#00d4ff;line-height:1;"></div>
+            <div id="visKioskDate" style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;"></div>
+          </div>
+        </div>
+
+        <!-- Onsite count -->
+        <div style="background:rgba(0,0,0,0.04);border-bottom:1px solid var(--border);padding:12px 32px;display:flex;align-items:center;gap:12px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:#059669;"></div>
+          <span style="font-size:13px;color:var(--text2);">Currently onsite: <strong id="visKioskOnsite" style="color:var(--text);font-family:'Space Grotesk',sans-serif;">0</strong> visitor(s)</span>
+        </div>
+
+        <div style="padding:24px 32px;max-width:800px;margin:0 auto;">
+
+          <!-- NEW VISITOR FORM -->
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px;">
+            <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:16px;">New Visitor — Sign In</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+              <div>
+                <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;">Full Name *</label>
+                <input type="text" id="visNameInput" placeholder="e.g. Kwame Asante" style="width:100%;padding:13px 16px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:'Sora',sans-serif;font-size:15px;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;">Phone Number</label>
+                <input type="tel" id="visPhoneInput" placeholder="e.g. 0244123456" style="width:100%;padding:13px 16px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:'Sora',sans-serif;font-size:15px;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;">Purpose of Visit *</label>
+                <select id="visPurposeInput" style="width:100%;padding:13px 16px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:'Sora',sans-serif;font-size:14px;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+                  <option value="">— Select Purpose —</option>
+                  <option value="Parent / Guardian">Parent / Guardian</option>
+                  <option value="School Business">School Business</option>
+                  <option value="Delivery">Delivery</option>
+                  <option value="Interview">Interview</option>
+                  <option value="Inspection / Official">Inspection / Official</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;">Person to See</label>
+                <input type="text" id="visHostInput" placeholder="e.g. Headmaster, Mrs. Owusu" style="width:100%;padding:13px 16px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:'Sora',sans-serif;font-size:14px;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+              </div>
+            </div>
+            <div id="visSignInError" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;"></div>
+            <button onclick="visitorSignIn()" style="width:100%;padding:15px;background:linear-gradient(135deg,#059669,#047857);color:white;border:none;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer;font-family:'Sora',sans-serif;letter-spacing:.3px;box-shadow:0 4px 14px rgba(5,150,105,0.3);transition:opacity .2s;" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">Sign In</button>
+          </div>
+
+          <!-- CURRENTLY ONSITE — SIGN OUT -->
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;">
+            <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;">Currently Onsite</div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">Click Sign Out when a visitor leaves</div>
+            <div id="visOnsiteList"></div>
+          </div>
         </div>
       </div>
 
