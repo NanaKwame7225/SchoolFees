@@ -556,6 +556,7 @@
         <div class="nav-item" onclick="showPage('attendance')"><span class="icon">📋</span> Student Attendance</div>
         <div class="nav-item" onclick="showPage('staffattendance')"><span class="icon">🕐</span> Staff Attendance</div>
         <div class="nav-item" onclick="showPage('visitors')"><span class="icon">🪪</span> Visitor Sign-In</div>
+        <div class="nav-item" onclick="showPage('pickup')"><span class="icon">🚌</span> Child Pickup</div>
       </div>
       <div class="nav-section">
         <div class="nav-label">Documents</div>
@@ -1125,6 +1126,66 @@
           <div id="teacherAttList"></div>
           <div style="margin-top:20px;text-align:center;">
             <button class="btn btn-primary" onclick="submitTeacherAttendance()">✅ Submit Attendance</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHILD PICKUP PAGE -->
+      <div class="page" id="page-pickup">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h2>🚌 Child Pickup Register</h2>
+            <p>Record details of persons collecting students — name, phone, Ghana Card and relation.</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="requirePasswordThen(exportPickupExcel,'Child Pickup Log Excel')">📊 Export Excel</button>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:12px;">Record a Child Collection</div>
+            <div class="form-field" style="margin-bottom:12px;">
+              <label>Student Name or ID *</label>
+              <input type="text" id="pickupStudentSearch" placeholder="Type student name or index number" list="pickupStudentList"
+                style="width:100%;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+              <datalist id="pickupStudentList"></datalist>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+              <div class="form-field">
+                <label>Collector Full Name *</label>
+                <input type="text" id="pickupCollectorName" placeholder="e.g. Kwame Asante"
+                  style="width:100%;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+              </div>
+              <div class="form-field">
+                <label>Relation to Student *</label>
+                <select id="pickupRelation" style="width:100%;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+                  <option value="">— Select —</option>
+                  <option value="Parent">Parent</option>
+                  <option value="Guardian">Guardian</option>
+                  <option value="Driver">Driver</option>
+                  <option value="Rider / Motorbike">Rider / Motorbike</option>
+                  <option value="Sibling">Sibling</option>
+                  <option value="Relative">Relative</option>
+                  <option value="School Bus">School Bus</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Phone Number</label>
+                <input type="tel" id="pickupPhone" placeholder="0244123456"
+                  style="width:100%;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+              </div>
+              <div class="form-field">
+                <label>Ghana Card Number</label>
+                <input type="text" id="pickupGhanaCard" placeholder="GHA-XXXXXXXXX-X"
+                  style="width:100%;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+              </div>
+            </div>
+            <div id="pickupError" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;"></div>
+            <button class="btn btn-primary" onclick="recordPickup()">Record Pickup</button>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:4px;">Today's Pickup Log</div>
+            <p style="font-size:12px;color:var(--text3);margin-bottom:14px;">All children collected today</p>
+            <div id="pickupLogTable"></div>
           </div>
         </div>
       </div>
