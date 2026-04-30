@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <!-- PWA Icons (inline SVG as data URI) -->
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%230a0a0f'/%3E%3Ctext y='140' x='96' text-anchor='middle' font-size='120' fill='%2300d4ff'%3E🏫%3C/text%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #f4f6f9;
@@ -207,7 +207,7 @@
   .stat-card.red::before { background:linear-gradient(90deg,var(--red),#f87171); }
   .stat-icon { font-size:28px; margin-bottom:10px; }
   .stat-label { font-size:11px; color:var(--text3); font-weight:600; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
-  .stat-value { font-size:28px; font-weight:800; font-family:'JetBrains Mono',monospace; }
+  .stat-value { font-size:28px; font-weight:800; font-family:'Space Grotesk','JetBrains Mono',monospace; }
   .stat-value.blue { color:var(--accent); }
   .stat-value.green { color:var(--green); }
   .stat-value.gold { color:var(--gold); }
@@ -231,7 +231,7 @@
   th { padding:12px 16px; text-align:left; font-weight:600; font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:0.8px; white-space:nowrap; }
   td { padding:12px 16px; border-top:1px solid var(--border); color:var(--text); white-space:nowrap; }
   tr:hover td { background:rgba(255,255,255,0.02); }
-  .mono { font-family:'JetBrains Mono',monospace; font-size:12px; }
+  .mono { font-family:'Space Grotesk','JetBrains Mono',monospace; font-size:12px; }
 
   /* STATUS BADGES */
   .status { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; }
@@ -550,6 +550,11 @@
       <div class="nav-section">
         <div class="nav-label">Year End</div>
         <div class="nav-item" onclick="showPage('promote')"><span class="icon">🎓</span> Promotions</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Attendance</div>
+        <div class="nav-item" onclick="showPage('attendance')"><span class="icon">📋</span> Student Attendance</div>
+        <div class="nav-item" onclick="showPage('staffattendance')"><span class="icon">🕐</span> Staff Attendance</div>
       </div>
       <div class="nav-section">
         <div class="nav-label">Documents</div>
@@ -877,6 +882,148 @@
           <div class="card">
             <div class="card-header"><div><div class="card-title">📚 Archived Years</div><div class="card-sub">Previous academic year records</div></div></div>
             <div id="archivesList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STUDENT ATTENDANCE PAGE -->
+      <div class="page" id="page-attendance">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h2>📋 Student Attendance</h2>
+            <p>Track daily student attendance by class. Generate teacher links for classroom use.</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="generateTeacherLink()">🔗 Teacher Link</button>
+            <button class="btn btn-secondary btn-sm" onclick="requirePasswordThen(exportAttendanceExcel,'Attendance Excel')">📊 Export Excel</button>
+          </div>
+        </div>
+
+        <!-- Summary stats -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:20px;">
+          <div class="stat-card"><div class="stat-value" id="attTodayPresent" style="font-family:'Space Grotesk',sans-serif;">0</div><div class="stat-label">Present Today</div></div>
+          <div class="stat-card"><div class="stat-value" id="attTodayAbsent" style="font-family:'Space Grotesk',sans-serif;">0</div><div class="stat-label">Absent Today</div></div>
+          <div class="stat-card"><div class="stat-value" id="attWeekRate" style="font-family:'Space Grotesk',sans-serif;">0%</div><div class="stat-label">This Week Rate</div></div>
+          <div class="stat-card"><div class="stat-value" id="attMonthRate" style="font-family:'Space Grotesk',sans-serif;">0%</div><div class="stat-label">This Month Rate</div></div>
+          <div class="stat-card"><div class="stat-value" id="attTermRate" style="font-family:'Space Grotesk',sans-serif;">0%</div><div class="stat-label">This Term Rate</div></div>
+        </div>
+
+        <!-- Class selector + date -->
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="flex:1;min-width:160px;">
+            <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;">Class</label>
+            <select id="attClassFilter" onchange="renderAttendance()" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+              <option value="">All Classes</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;">Date</label>
+            <input type="date" id="attDate" onchange="renderAttendance()" style="padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;">View</label>
+            <select id="attView" onchange="renderAttendance()" style="padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+              <option value="daily">Today</option>
+              <option value="weekly">This Week</option>
+              <option value="monthly">This Month</option>
+              <option value="term">This Term</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="markAllPresent()">✅ Mark All Present</button>
+        </div>
+
+        <div id="attendanceGrid"></div>
+      </div>
+
+      <!-- STAFF ATTENDANCE PAGE -->
+      <div class="page" id="page-staffattendance">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h2>🕐 Staff Attendance</h2>
+            <p>Staff sign in and out. Admin can generate a sign-in page link for staff to use.</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="generateStaffAttLink()">🔗 Staff Sign-In Link</button>
+            <button class="btn btn-secondary btn-sm" onclick="requirePasswordThen(exportStaffAttExcel,'Staff Attendance Excel')">📊 Export Excel</button>
+          </div>
+        </div>
+
+        <!-- Summary stats -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:20px;">
+          <div class="stat-card"><div class="stat-value" id="sattTodayIn" style="font-family:'Space Grotesk',sans-serif;">0</div><div class="stat-label">Signed In Today</div></div>
+          <div class="stat-card"><div class="stat-value" id="sattTodayOut" style="font-family:'Space Grotesk',sans-serif;">0</div><div class="stat-label">Signed Out</div></div>
+          <div class="stat-card"><div class="stat-value" id="sattOnsite" style="font-family:'Space Grotesk',sans-serif;">0</div><div class="stat-label">Currently Onsite</div></div>
+        </div>
+
+        <!-- Date filter -->
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end;">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;">Date</label>
+            <input type="date" id="sattDate" onchange="renderStaffAttendance()" style="padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;">View</label>
+            <select id="sattView" onchange="renderStaffAttendance()" style="padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+              <option value="daily">Today</option>
+              <option value="weekly">This Week</option>
+              <option value="monthly">This Month</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="staffAttGrid"></div>
+      </div>
+
+      <!-- STAFF SIGN-IN KIOSK PAGE -->
+      <div class="page" id="page-staffsignin" style="background:var(--bg);min-height:100vh;padding:0;">
+        <!-- Kiosk Header -->
+        <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:48px;height:48px;background:rgba(255,255,255,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;">🏫</div>
+            <div>
+              <div id="staffSignInSchoolName" style="font-size:18px;font-weight:800;color:#fff;"></div>
+              <div id="staffSignInDate" style="font-size:12px;color:rgba(255,255,255,0.55);margin-top:2px;"></div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div id="kioskClock" style="font-family:'Space Grotesk',sans-serif;font-size:40px;font-weight:800;color:#00d4ff;line-height:1;"></div>
+            <div id="kioskDay" style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;text-transform:uppercase;letter-spacing:1px;"></div>
+          </div>
+        </div>
+
+        <!-- Stats bar -->
+        <div style="background:rgba(0,0,0,0.04);border-bottom:1px solid var(--border);padding:12px 32px;display:flex;gap:32px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:#059669;"></div>
+            <span style="font-size:13px;color:var(--text2);">Signed In: <strong id="kioskCountIn" style="color:var(--text);font-family:'Space Grotesk',sans-serif;">0</strong></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:#0284c7;"></div>
+            <span style="font-size:13px;color:var(--text2);">Signed Out: <strong id="kioskCountOut" style="color:var(--text);font-family:'Space Grotesk',sans-serif;">0</strong></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:#f59e0b;"></div>
+            <span style="font-size:13px;color:var(--text2);">Not Yet: <strong id="kioskCountPending" style="color:var(--text);font-family:'Space Grotesk',sans-serif;">0</strong></span>
+          </div>
+        </div>
+
+        <!-- Staff cards grid -->
+        <div style="padding:24px 32px;">
+          <div id="staffSignInList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
+        </div>
+      </div>
+
+      <!-- TEACHER ATTENDANCE PAGE (accessed via link) -->
+      <div class="page" id="page-teacherattendance">
+        <div style="max-width:700px;margin:0 auto;padding:16px;">
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:40px;margin-bottom:6px;">📋</div>
+            <h2 id="teacherAttTitle" style="font-size:20px;font-weight:800;color:var(--text);"></h2>
+            <p id="teacherAttDate" style="color:var(--text3);font-size:13px;"></p>
+          </div>
+          <div id="teacherAttList"></div>
+          <div style="margin-top:20px;text-align:center;">
+            <button class="btn btn-primary" onclick="submitTeacherAttendance()">✅ Submit Attendance</button>
           </div>
         </div>
       </div>
