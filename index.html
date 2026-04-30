@@ -2638,26 +2638,61 @@ function loadFromStorage(){
 }
 
 // ── Save helpers — call after every mutation ──────────────────
-function saveStudents()  { LS.save(LS.KEYS.students,   STUDENTS);    }
-function savePayments()  { LS.save(LS.KEYS.payments,   PAYMENTS);    }
-function saveStaff()     { LS.save(LS.KEYS.staff,      STAFF);       }
-function saveSettings()  { LS.save(LS.KEYS.settings,   SETTINGS);    }
-function saveUsers()     { LS.save(LS.KEYS.users,      USERS);       }
-function saveLogo()      { LS.save(LS.KEYS.logo,       SCHOOL_LOGO); }
-function saveAuditLog()  { LS.save(LS.KEYS.auditLog,   AUDIT_LOG);   }
-function saveFraudInbox(){ LS.save(LS.KEYS.fraudInbox, FRAUD_INBOX); }
-function savePromHist()  { LS.save(LS.KEYS.promHist,   PROM_HISTORY);}
+// ── Dual-write: localStorage + MongoDB sync ─────────────────
+// Every save writes to localStorage immediately (instant, offline-safe)
+// Then silently syncs to MongoDB in the background
+var _syncQueue = {};
+var _syncTimer = null;
 
-// Save everything at once
-function saveLevies()     { LS.save(LS.KEYS.levies,       STUDENT_LEVIES); }
-function saveLevyPayments(){ LS.save(LS.KEYS.levyPayments, LEVY_PAYMENTS); }
-function saveLevyTypes()  { LS.save(LS.KEYS.levyTypes,    LEVY_TYPES); }
+function _scheduleSync(collection, data){
+  // Debounce — batch rapid changes into one API call per collection
+  _syncQueue[collection] = data;
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(function(){ _flushSync(); }, 800);
+}
+
+async function _flushSync(){
+  if(!getToken()) return;
+  var q = _syncQueue;
+  _syncQueue = {};
+  var failed = [];
+  for(var col in q){
+    try{
+      await api('POST', '/sync/'+col, { data: q[col] });
+    } catch(e){
+      failed.push(col);
+      console.warn('Sync to MongoDB failed for '+col+':', e.message);
+    }
+  }
+  if(failed.length === 0){
+    var el = document.getElementById('syncDot');
+    if(el){ el.style.background='var(--green)'; el.title='Synced to server'; setTimeout(function(){el.style.background='var(--accent)';},2000); }
+  }
+}
+
+function saveStudents()  { LS.save(LS.KEYS.students,   STUDENTS);     _scheduleSync('students',   STUDENTS);    }
+function savePayments()  { LS.save(LS.KEYS.payments,   PAYMENTS);     _scheduleSync('payments',   PAYMENTS);    }
+function saveStaff()     { LS.save(LS.KEYS.staff,       STAFF);        _scheduleSync('staff',      STAFF);       }
+function saveSettings()  { LS.save(LS.KEYS.settings,   SETTINGS);     _scheduleSync('settings',   SETTINGS);    }
+function saveUsers()     { LS.save(LS.KEYS.users,       USERS);        }
+function saveLogo()      { LS.save(LS.KEYS.logo,        SCHOOL_LOGO);  }
+function saveAuditLog()  { LS.save(LS.KEYS.auditLog,   AUDIT_LOG);    _scheduleSync('audit',      AUDIT_LOG);   }
+function saveFraudInbox(){ LS.save(LS.KEYS.fraudInbox, FRAUD_INBOX);  }
+function savePromHist()  { LS.save(LS.KEYS.promHist,   PROM_HISTORY); }
+
+function saveLevies()     { LS.save(LS.KEYS.levies,      STUDENT_LEVIES); _scheduleSync('levies',      STUDENT_LEVIES); }
+function saveLevyPayments(){ LS.save(LS.KEYS.levyPayments,LEVY_PAYMENTS);  _scheduleSync('levypayments',LEVY_PAYMENTS);  }
+function saveLevyTypes()  { LS.save(LS.KEYS.levyTypes,   LEVY_TYPES);     _scheduleSync('levytypes',   LEVY_TYPES);     }
+
 function saveAll(){
   saveStudents(); savePayments(); saveStaff();
   saveSettings(); saveUsers(); saveLogo();
   saveAuditLog(); saveFraudInbox(); savePromHist();
   saveLevies(); saveLevyPayments(); saveLevyTypes();
 }
+
+// ── Also mirror fetchAllFromAPI back to localStorage ─────────
+// (already done in fetchAllFromAPI — this ensures every sync populates LS)
 
 // ── Storage status (shown in Settings) ───────────────────────
 function renderStorageStatus(){
