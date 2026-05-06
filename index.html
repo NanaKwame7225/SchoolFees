@@ -548,6 +548,12 @@
  <div class="nav-item" onclick="showPage('search')">Search</div>
  </div>
  <div class="nav-section">
+ <div class="nav-label">Academics</div>
+ <div class="nav-item" onclick="showPage('grading')">Grading System</div>
+ <div class="nav-item" onclick="showPage('results')">Student Results</div>
+ <div class="nav-item" onclick="showPage('rankings')">Class Rankings</div>
+ </div>
+ <div class="nav-section">
  <div class="nav-label">Year End</div>
  <div class="nav-item" onclick="showPage('promote')">Promotions</div>
  </div>
@@ -1519,6 +1525,109 @@
  </div>
 
  <!-- SETTINGS -->
+ <!-- GRADING SYSTEM PAGE -->
+ <div class="page" id="page-grading">
+  <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+   <div><h2>Grading System</h2><p>Configure your school grading scale, subjects per class, and performance thresholds.</p></div>
+   <button class="btn btn-primary btn-sm" onclick="saveGradingConfig()">Save Configuration</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+   <div class="card">
+    <div class="card-title" style="margin-bottom:4px;">Grade Scale</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">Define grade boundaries. Fully editable to match your school.</p>
+    <div id="gradeScaleEditor"></div>
+    <button class="btn btn-secondary btn-sm" onclick="addGradeBand()" style="margin-top:12px;">Add Grade Band</button>
+   </div>
+   <div class="card">
+    <div class="card-title" style="margin-bottom:4px;">Performance Thresholds</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">Set score boundaries for flagging students.</p>
+    <div class="form-field" style="margin-bottom:14px;">
+     <label>Struggling Below (%)</label>
+     <input type="number" id="strugglingThreshold" value="50" min="0" max="100" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+    </div>
+    <div class="form-field" style="margin-bottom:14px;">
+     <label>Distinction Above (%)</label>
+     <input type="number" id="distinctionThreshold" value="80" min="0" max="100" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+    </div>
+   </div>
+  </div>
+  <div class="card">
+   <div class="card-title" style="margin-bottom:4px;">Subjects Per Class</div>
+   <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">Define subjects for each class. Teachers and admins can both add subjects.</p>
+   <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+    <select id="subjectClassSel" style="padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;"><option value="">Select class...</option></select>
+    <input type="text" id="subjectNameInput" placeholder="Subject name e.g. Mathematics" style="flex:1;min-width:160px;padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+    <button class="btn btn-secondary btn-sm" onclick="addSubjectToClass()">Add Subject</button>
+   </div>
+   <div id="subjectsByClassView"></div>
+  </div>
+ </div>
+
+ <!-- STUDENT RESULTS PAGE -->
+ <div class="page" id="page-results">
+  <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+   <div><h2>Student Results</h2><p>Enter or upload raw scores. Grades are calculated automatically.</p></div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <button class="btn btn-secondary btn-sm" onclick="downloadResultsTemplate()">Download Template</button>
+    <input type="file" id="resultsUploadFile" accept=".csv,.xlsx,.xls" style="display:none;" onchange="uploadResultsFile(event)">
+    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('resultsUploadFile').click()">Upload Results</button>
+    <button class="btn btn-secondary btn-sm" onclick="requirePasswordThen(exportResultsExcel,'Results Excel')">Export Excel</button>
+   </div>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+   <select id="resultClassFilter" onchange="renderResults()" style="padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;"><option value="">All Classes</option></select>
+   <select id="resultSubjectFilter" onchange="renderResults()" style="padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;"><option value="">All Subjects</option></select>
+   <select id="resultTermFilter" onchange="renderResults()" style="padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;"><option value="Term 1">Term 1</option><option value="Term 2">Term 2</option><option value="Term 3">Term 3</option></select>
+   <select id="resultViewFilter" onchange="renderResults()" style="padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;"><option value="all">All Students</option><option value="struggling">Struggling Only</option><option value="distinction">Distinction Only</option></select>
+   <input type="text" id="resultSearch" oninput="renderResults()" placeholder="Search student..." style="flex:1;min-width:160px;padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+  </div>
+  <div id="strugglingBanner" style="display:none;background:rgba(220,38,38,0.07);border:1.5px solid rgba(220,38,38,0.25);border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+   <div style="font-size:13px;font-weight:700;color:var(--red);">Students Struggling — Attention Required</div>
+   <div id="strugglingList" style="font-size:12px;color:var(--text2);margin-top:6px;"></div>
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+   <div class="card-title" style="margin-bottom:12px;">Enter Score Manually</div>
+   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px;">
+    <div>
+     <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px;">Student</label>
+     <input type="text" id="scoreStudentInput" placeholder="Name or ID" list="scoreStudentList" style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+     <datalist id="scoreStudentList"></datalist>
+    </div>
+    <div>
+     <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px;">Subject</label>
+     <input type="text" id="scoreSubjectInput" placeholder="e.g. Mathematics" list="scoreSubjectList" style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+     <datalist id="scoreSubjectList"></datalist>
+    </div>
+    <div>
+     <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px;">Score (0-100)</label>
+     <input type="number" id="scoreValueInput" placeholder="e.g. 78" min="0" max="100" style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;">
+    </div>
+    <div>
+     <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px;">Term</label>
+     <select id="scoreTermInput" style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;"><option value="Term 1">Term 1</option><option value="Term 2">Term 2</option><option value="Term 3">Term 3</option></select>
+    </div>
+    <div style="display:flex;align-items:flex-end;">
+     <button class="btn btn-primary" onclick="saveScore()" style="width:100%;padding:9px;">Save Score</button>
+    </div>
+   </div>
+  </div>
+  <div id="resultsTable"></div>
+ </div>
+
+ <!-- CLASS RANKINGS PAGE -->
+ <div class="page" id="page-rankings">
+  <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+   <div><h2>Class Rankings</h2><p>Students ranked 1st to last by class, subject and whole school. Auto-calculated.</p></div>
+   <button class="btn btn-secondary btn-sm" onclick="requirePasswordThen(exportRankingsExcel,'Rankings Excel')">Export Excel</button>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+   <select id="rankClassFilter" onchange="renderRankings()" style="padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;"><option value="">All Classes</option></select>
+   <select id="rankTermFilter" onchange="renderRankings()" style="padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;"><option value="Term 1">Term 1</option><option value="Term 2">Term 2</option><option value="Term 3">Term 3</option></select>
+   <select id="rankViewFilter" onchange="renderRankings()" style="padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;"><option value="class">By Class (Overall)</option><option value="subject">By Subject</option><option value="school">Whole School</option></select>
+  </div>
+  <div id="rankingsTable"></div>
+ </div>
+
  <!-- SCHOOL INFO PAGE -->
  <div class="page" id="page-schoolinfo">
  <div class="page-header">
