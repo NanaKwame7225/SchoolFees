@@ -7966,7 +7966,10 @@ function saveGradingConfig(){
 }
 
 function populateSubjectClassSel(){
-  var classes=[...new Set(STUDENTS.map(function(s){return s.class_;}).filter(Boolean))].sort();
+  var GHANA_CLASSES=['Creche','Nursery 1','Nursery 2','KG 1','KG 2','Class 1','Class 2','Class 3','Class 4','Class 5','Class 6','JHS 1','JHS 2','JHS 3'];
+  var studentClasses=STUDENTS.map(function(s){return s.class_;}).filter(Boolean);
+  var extras=studentClasses.filter(function(c){return GHANA_CLASSES.indexOf(c)<0;});
+  var classes=GHANA_CLASSES.concat([...new Set(extras)].sort());
   var bOpt='<option value="">Select class...</option>';
   var aOpt='<option value="">All Classes</option>';
   var opts=classes.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
