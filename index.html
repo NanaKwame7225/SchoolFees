@@ -7869,6 +7869,359 @@ function checkStaffOrMsgParam() {
  return false;
 }
 
+
+// GRADING SYSTEM MODULE
+function getGradeConfigKey(){return getLSPrefix()+'gradeConfig';}
+function getResultsKey(){return getLSPrefix()+'results';}
+function getSubjectsKey(){return getLSPrefix()+'subjects';}
+
+function loadGradeConfig(){
+  var def={bands:[
+    {grade:'A+',label:'Excellent',min:90,color:'#059669'},
+    {grade:'A',label:'Very Good',min:80,color:'#10b981'},
+    {grade:'B+',label:'Good',min:70,color:'#0284c7'},
+    {grade:'B',label:'Above Average',min:60,color:'#0ea5e9'},
+    {grade:'C',label:'Average',min:50,color:'#d97706'},
+    {grade:'D',label:'Below Average',min:40,color:'#ea580c'},
+    {grade:'E',label:'Weak',min:30,color:'#dc2626'},
+    {grade:'F',label:'Fail',min:0,color:'#b91c1c'}
+  ],strugglingBelow:50,distinctionAbove:80};
+  try{var s=localStorage.getItem(getGradeConfigKey());return s?Object.assign({},def,JSON.parse(s)):def;}catch(e){return def;}
+}
+function saveGradeConfig(cfg){localStorage.setItem(getGradeConfigKey(),JSON.stringify(cfg));}
+function loadResults(){try{return JSON.parse(localStorage.getItem(getResultsKey())||'[]');}catch(e){return[];}}
+function saveResults(r){localStorage.setItem(getResultsKey(),JSON.stringify(r));}
+function loadSubjectsData(){try{return JSON.parse(localStorage.getItem(getSubjectsKey())||'{}');}catch(e){return{};}}
+function saveSubjectsData(s){localStorage.setItem(getSubjectsKey(),JSON.stringify(s));}
+
+function calcGrade(score){
+  var cfg=loadGradeConfig();
+  var bands=cfg.bands.slice().sort(function(a,b){return b.min-a.min;});
+  for(var i=0;i<bands.length;i++){if(score>=bands[i].min)return bands[i];}
+  return bands[bands.length-1]||{grade:'F',label:'Fail',color:'#b91c1c'};
+}
+
+function initGradingPage(){
+  renderGradeScaleEditor();
+  populateSubjectClassSel();
+  renderSubjectsByClass();
+  var cfg=loadGradeConfig();
+  var st=document.getElementById('strugglingThreshold');
+  var dt=document.getElementById('distinctionThreshold');
+  if(st)st.value=cfg.strugglingBelow;
+  if(dt)dt.value=cfg.distinctionAbove;
+}
+
+function renderGradeScaleEditor(){
+  var el=document.getElementById('gradeScaleEditor');
+  if(!el)return;
+  var cfg=loadGradeConfig();
+  var bands=cfg.bands.slice().sort(function(a,b){return b.min-a.min;});
+  var h='<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+    +'<thead><tr style="background:var(--surface2);">'
+    +'<th style="padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);">Grade</th>'
+    +'<th style="padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);">Label</th>'
+    +'<th style="padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);">Min Score</th>'
+    +'<th style="padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--text3);">Colour</th>'
+    +'<th style="padding:8px 10px;text-align:center;font-size:10px;color:var(--text3);">Action</th>'
+    +'</tr></thead><tbody>';
+  bands.forEach(function(b,i){
+    h+='<tr data-idx="'+i+'" style="border-top:1px solid var(--border);">'
+      +'<td style="padding:7px 10px;"><input type="text" value="'+b.grade+'" data-field="grade" data-idx="'+i+'" onchange="updateBandEl(this)" style="width:50px;padding:5px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;font-weight:800;outline:none;text-align:center;"></td>'
+      +'<td style="padding:7px 10px;"><input type="text" value="'+b.label+'" data-field="label" data-idx="'+i+'" onchange="updateBandEl(this)" style="width:110px;padding:5px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none;"></td>'
+      +'<td style="padding:7px 10px;"><input type="number" value="'+b.min+'" min="0" max="100" data-field="min" data-idx="'+i+'" onchange="updateBandEl(this)" style="width:70px;padding:5px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;font-weight:700;outline:none;"></td>'
+      +'<td style="padding:7px 10px;"><input type="color" value="'+(b.color||'#0284c7')+'" data-field="color" data-idx="'+i+'" onchange="updateBandEl(this)" style="width:40px;height:28px;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:2px;"></td>'
+      +'<td style="padding:7px 10px;text-align:center;"><button onclick="removeBand('+i+')" style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);color:var(--red);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;">Remove</button></td>'
+      +'</tr>';
+  });
+  h+='</tbody></table>';
+  el.innerHTML=h;
+}
+
+function updateBandEl(el){
+  var field=el.getAttribute('data-field'),idx=parseInt(el.getAttribute('data-idx'));
+  var cfg=loadGradeConfig();
+  var bands=cfg.bands.slice().sort(function(a,b){return b.min-a.min;});
+  if(field==='min')bands[idx].min=parseInt(el.value)||0;
+  else bands[idx][field]=el.value;
+  cfg.bands=bands;saveGradeConfig(cfg);
+}
+function addGradeBand(){
+  var cfg=loadGradeConfig();
+  cfg.bands.push({grade:'X',label:'New Grade',min:0,color:'#64748b'});
+  saveGradeConfig(cfg);renderGradeScaleEditor();
+  toast('New grade band added','success');
+}
+function removeBand(idx){
+  var cfg=loadGradeConfig();
+  var bands=cfg.bands.slice().sort(function(a,b){return b.min-a.min;});
+  bands.splice(idx,1);cfg.bands=bands;saveGradeConfig(cfg);renderGradeScaleEditor();
+}
+function saveGradingConfig(){
+  var cfg=loadGradeConfig();
+  var st=document.getElementById('strugglingThreshold'),dt=document.getElementById('distinctionThreshold');
+  if(st)cfg.strugglingBelow=parseInt(st.value)||50;
+  if(dt)cfg.distinctionAbove=parseInt(dt.value)||80;
+  saveGradeConfig(cfg);toast('Grading configuration saved','success');
+}
+
+function populateSubjectClassSel(){
+  var classes=[...new Set(STUDENTS.map(function(s){return s.class_;}).filter(Boolean))].sort();
+  var bOpt='<option value="">Select class...</option>';
+  var aOpt='<option value="">All Classes</option>';
+  var opts=classes.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
+  var s1=document.getElementById('subjectClassSel');if(s1)s1.innerHTML=bOpt+opts;
+  var s2=document.getElementById('resultClassFilter');if(s2)s2.innerHTML=aOpt+opts;
+  var s3=document.getElementById('rankClassFilter');if(s3)s3.innerHTML=aOpt+opts;
+}
+function addSubjectToClass(){
+  var cls=(document.getElementById('subjectClassSel')||{value:''}).value;
+  var sub=(document.getElementById('subjectNameInput')||{value:''}).value.trim();
+  if(!cls){toast('Please select a class first','error');return;}
+  if(!sub){toast('Please enter a subject name','error');return;}
+  var subjects=loadSubjectsData();
+  if(!subjects[cls])subjects[cls]=[];
+  if(subjects[cls].indexOf(sub)===-1){subjects[cls].push(sub);saveSubjectsData(subjects);}
+  document.getElementById('subjectNameInput').value='';
+  renderSubjectsByClass();populateSubjectDropdowns();
+  toast(sub+' added to '+cls,'success');
+}
+function renderSubjectsByClass(){
+  var el=document.getElementById('subjectsByClassView');if(!el)return;
+  var subjects=loadSubjectsData();
+  var classes=[...new Set(STUDENTS.map(function(s){return s.class_;}).filter(Boolean))].sort();
+  if(!classes.length){el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:10px;">No students registered yet.</div>';return;}
+  var h='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">';
+  classes.forEach(function(cls){
+    var subs=subjects[cls]||[];
+    var chips=subs.length
+      ?'<div style="display:flex;flex-wrap:wrap;gap:6px;">'+subs.map(function(s){return '<span style="padding:4px 10px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;">'+s+'</span>';}).join('')+'</div>'
+      :'<div style="font-size:12px;color:var(--text3);">No subjects defined yet</div>';
+    h+='<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;">'
+      +'<div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:10px;">'+cls+'</div>'+chips+'</div>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
+}
+function populateSubjectDropdowns(){
+  var subjects=loadSubjectsData();
+  var all=[...new Set(Object.values(subjects).reduce(function(a,b){return a.concat(b);},[])) ].sort();
+  var sl=document.getElementById('scoreSubjectList');if(sl)sl.innerHTML=all.map(function(s){return '<option value="'+s+'">'+s+'</option>';}).join('');
+  var sf=document.getElementById('resultSubjectFilter');if(sf)sf.innerHTML='<option value="">All Subjects</option>'+all.map(function(s){return '<option value="'+s+'">'+s+'</option>';}).join('');
+}
+
+function initResultsPage(){
+  populateSubjectClassSel();populateSubjectDropdowns();
+  var dl=document.getElementById('scoreStudentList');
+  if(dl)dl.innerHTML=STUDENTS.filter(function(s){return !s.withdrawn;}).map(function(s){return '<option value="'+s.name+'">'+s.id+'</option>';}).join('');
+  renderResults();renderStrugglingBanner();
+}
+function saveScore(){
+  var nid=(document.getElementById('scoreStudentInput')||{value:''}).value.trim();
+  var sub=(document.getElementById('scoreSubjectInput')||{value:''}).value.trim();
+  var sc=parseFloat((document.getElementById('scoreValueInput')||{value:''}).value);
+  var term=(document.getElementById('scoreTermInput')||{value:'Term 1'}).value;
+  if(!nid||!sub||isNaN(sc)){toast('Please fill all fields','error');return;}
+  if(sc<0||sc>100){toast('Score must be between 0 and 100','error');return;}
+  var student=STUDENTS.find(function(s){return s.name.toLowerCase()===nid.toLowerCase()||s.id.toLowerCase()===nid.toLowerCase();});
+  if(!student){toast('Student not found. Enter exact name or ID.','error');return;}
+  var g=calcGrade(sc);
+  var entry={studentId:student.id,studentName:student.name,class_:student.class_,subject:sub,score:sc,grade:g.grade,gradeLabel:g.label,term:term,enteredBy:currentAdminName||'Admin',enteredAt:new Date().toISOString()};
+  var results=loadResults();
+  var idx=results.findIndex(function(r){return r.studentId===student.id&&r.subject===sub&&r.term===term;});
+  if(idx>=0)results[idx]=entry;else results.push(entry);
+  saveResults(results);
+  document.getElementById('scoreStudentInput').value='';
+  document.getElementById('scoreValueInput').value='';
+  document.getElementById('scoreStudentInput').focus();
+  toast(student.name+' — '+sub+': '+sc+'% ('+g.grade+' — '+g.label+')','success');
+  renderResults();renderStrugglingBanner();
+}
+function renderStrugglingBanner(){
+  var banner=document.getElementById('strugglingBanner'),list=document.getElementById('strugglingList');
+  if(!banner||!list)return;
+  var cfg=loadGradeConfig(),results=loadResults();
+  var term=(document.getElementById('resultTermFilter')||{value:'Term 1'}).value;
+  var struggling=[];
+  STUDENTS.filter(function(s){return !s.withdrawn;}).forEach(function(student){
+    var sr=results.filter(function(r){return r.studentId===student.id&&r.term===term&&r.score<cfg.strugglingBelow;});
+    if(sr.length)struggling.push({name:student.name,class_:student.class_,subjects:sr.map(function(r){return r.subject+' ('+r.score+'%)';})});
+  });
+  if(!struggling.length){banner.style.display='none';return;}
+  banner.style.display='block';
+  list.innerHTML=struggling.map(function(s){
+    return '<div style="margin-top:6px;padding:8px 10px;background:rgba(220,38,38,0.05);border-radius:6px;">'
+      +'<strong style="color:var(--red);">'+s.name+'</strong>'
+      +' <span style="color:var(--text3);font-size:11px;">('+s.class_+')</span>'
+      +' — Struggling in: '+s.subjects.join(', ')+'</div>';
+  }).join('');
+}
+function renderResults(){
+  var el=document.getElementById('resultsTable');if(!el)return;
+  var cfg=loadGradeConfig(),results=loadResults();
+  var cls=(document.getElementById('resultClassFilter')||{value:''}).value;
+  var sub=(document.getElementById('resultSubjectFilter')||{value:''}).value;
+  var term=(document.getElementById('resultTermFilter')||{value:'Term 1'}).value;
+  var view=(document.getElementById('resultViewFilter')||{value:'all'}).value;
+  var q=((document.getElementById('resultSearch')||{value:''}).value||'').toLowerCase();
+  var filtered=results.filter(function(r){
+    return (!cls||r.class_===cls)&&(!sub||r.subject===sub)&&r.term===term
+      &&(view==='all'||(view==='struggling'&&r.score<cfg.strugglingBelow)||(view==='distinction'&&r.score>=cfg.distinctionAbove))
+      &&(!q||r.studentName.toLowerCase().indexOf(q)>=0||r.subject.toLowerCase().indexOf(q)>=0);
+  }).sort(function(a,b){return b.score-a.score;});
+  if(!filtered.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3);">No results found. Enter scores above or upload a file.</div>';renderStrugglingBanner();return;}
+  var rows='';
+  filtered.forEach(function(r){
+    var g=calcGrade(r.score);
+    var struggling=r.score<cfg.strugglingBelow,distinction=r.score>=cfg.distinctionAbove;
+    var scoreCol=struggling?'var(--red)':distinction?'var(--green)':'var(--text)';
+    var statusHtml=struggling
+      ?'<span style="font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;background:rgba(220,38,38,0.1);color:var(--red);">Struggling</span>'
+      :distinction
+        ?'<span style="font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;background:rgba(5,150,105,0.1);color:var(--green);">Distinction</span>'
+        :'<span style="font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;background:var(--surface2);color:var(--text3);">Average</span>';
+    var key=encodeURIComponent(r.studentId+'|'+r.subject+'|'+r.term);
+    rows+='<tr style="border-top:1px solid var(--border);background:'+(struggling?'rgba(220,38,38,0.04)':distinction?'rgba(5,150,105,0.04)':'')+';">'  
+      +'<td style="padding:9px 12px;font-weight:700;">'+r.studentName+'</td>'
+      +'<td style="padding:9px 12px;color:var(--text3);">'+r.class_+'</td>'
+      +'<td style="padding:9px 12px;">'+r.subject+'</td>'
+      +'<td style="padding:9px 12px;text-align:center;font-family:Space Grotesk,sans-serif;font-size:16px;font-weight:800;color:'+scoreCol+';">'+r.score+'%</td>'
+      +'<td style="padding:9px 12px;text-align:center;font-weight:800;font-size:16px;font-family:Space Grotesk,sans-serif;color:'+(g.color||'var(--text)')+';">'+g.grade+'</td>'
+      +'<td style="padding:9px 12px;font-size:12px;color:var(--text3);">'+g.label+'</td>'
+      +'<td style="padding:9px 12px;text-align:center;">'+statusHtml+'</td>'
+      +'<td style="padding:9px 12px;text-align:center;"><button data-k="'+key+'" onclick="var p=decodeURIComponent(this.getAttribute(\"data-k\")).split(\"|\");deleteResult(p[0],p[1],p[2])" style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);color:var(--red);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;">Remove</button></td>'
+      +'</tr>';
+  });
+  el.innerHTML='<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:600px;">'
+    +'<thead><tr style="background:var(--surface2);"><th style="padding:10px 12px;text-align:left;">Student</th><th style="padding:10px 12px;text-align:left;">Class</th><th style="padding:10px 12px;text-align:left;">Subject</th><th style="padding:10px 12px;text-align:center;">Score</th><th style="padding:10px 12px;text-align:center;">Grade</th><th style="padding:10px 12px;text-align:left;">Remark</th><th style="padding:10px 12px;text-align:center;">Status</th><th style="padding:10px 12px;text-align:center;">Action</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table></div>';
+  renderStrugglingBanner();
+}
+function deleteResult(sid,sub,term){
+  saveResults(loadResults().filter(function(r){return !(r.studentId===sid&&r.subject===sub&&r.term===term);}));
+  renderResults();toast('Result removed','success');
+}
+async function uploadResultsFile(event){
+  var file=event.target.files[0];if(!file)return;
+  var ext=file.name.split('.').pop().toLowerCase();
+  var term=(document.getElementById('scoreTermInput')||{value:'Term 1'}).value;
+  function processRows(rows){
+    var results=loadResults(),imported=0,errors=0;
+    for(var i=1;i<rows.length;i++){
+      var row=rows[i];if(!row||row.length<3)continue;
+      var nid=String(row[0]||'').trim(),sub=String(row[1]||'').trim(),sc=parseFloat(row[2]);
+      if(!nid||!sub||isNaN(sc))continue;
+      var student=STUDENTS.find(function(s){return s.name.toLowerCase()===nid.toLowerCase()||s.id.toLowerCase()===nid.toLowerCase();});
+      if(!student){errors++;continue;}
+      var g=calcGrade(sc);
+      var entry={studentId:student.id,studentName:student.name,class_:student.class_,subject:sub,score:sc,grade:g.grade,gradeLabel:g.label,term:term,enteredBy:'Import',enteredAt:new Date().toISOString()};
+      var idx=results.findIndex(function(r){return r.studentId===student.id&&r.subject===sub&&r.term===term;});
+      if(idx>=0)results[idx]=entry;else results.push(entry);
+      imported++;
+    }
+    saveResults(results);
+    document.getElementById('resultsUploadFile').value='';
+    toast('Imported '+imported+' results'+(errors?' ('+errors+' not matched)':''),'success');
+    renderResults();renderStrugglingBanner();
+  }
+  if(ext==='csv'){
+    var reader=new FileReader();
+    reader.onload=function(e){processRows(e.target.result.split('\n').map(function(l){return l.split(',');}));};
+    reader.readAsText(file);
+  } else {
+    if(typeof XLSX==='undefined') await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+    var reader=new FileReader();
+    reader.onload=function(e){var wb=XLSX.read(e.target.result,{type:'binary'});processRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1}));};
+    reader.readAsBinaryString(file);
+  }
+}
+function downloadResultsTemplate(){
+  var csv='student_name_or_id,subject,score\nKofi Mensah,Mathematics,78\nAma Boateng,English,65\n';
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='results_template.csv';a.click();
+  toast('Template downloaded','success');
+}
+function initRankingsPage(){populateSubjectClassSel();renderRankings();}
+function renderRankings(){
+  var el=document.getElementById('rankingsTable');if(!el)return;
+  var cfg=loadGradeConfig();
+  var cls=(document.getElementById('rankClassFilter')||{value:''}).value;
+  var term=(document.getElementById('rankTermFilter')||{value:'Term 1'}).value;
+  var view=(document.getElementById('rankViewFilter')||{value:'class'}).value;
+  var results=loadResults().filter(function(r){return r.term===term;});
+  function getAvg(sid){var sr=results.filter(function(r){return r.studentId===sid;});return sr.length?{avg:sr.reduce(function(a,r){return a+r.score;},0)/sr.length,cnt:sr.length}:null;}
+  function posBg(i){return i===0?'rgba(212,170,26,0.18)':i===1?'rgba(148,163,184,0.14)':i===2?'rgba(180,120,60,0.12)':'transparent';}
+  function rankRow(x,i,showCls){
+    var g=calcGrade(x.avg);var struggling=x.avg<cfg.strugglingBelow;
+    return '<tr style="border-top:1px solid var(--border);">'
+      +'<td style="padding:9px 12px;text-align:center;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:16px;background:'+posBg(i)+';">"'+(i+1)+'</td>'
+      +'<td style="padding:9px 12px;font-weight:700;">'+x.s.name+'<br><span style="font-size:11px;color:var(--text3);font-weight:400;">'+x.s.id+'</span></td>'
+      +(showCls?'<td style="padding:9px 12px;color:var(--text3);">'+x.s.class_+'</td>':'')
+      +'<td style="padding:9px 12px;text-align:center;font-family:Space Grotesk,sans-serif;font-size:17px;font-weight:800;color:'+(struggling?'var(--red)':x.avg>=cfg.distinctionAbove?'var(--green)':'var(--text)')+';">'+x.avg.toFixed(1)+'%</td>'
+      +'<td style="padding:9px 12px;text-align:center;font-weight:800;font-size:16px;font-family:Space Grotesk,sans-serif;color:'+(g.color||'var(--text)')+';">'+g.grade+'</td>'
+      +'<td style="padding:9px 12px;text-align:center;font-family:Space Grotesk,sans-serif;font-weight:700;">'+x.cnt+'</td>'
+      +'<td style="padding:9px 12px;font-size:12px;color:var(--text3);">'+g.label+(struggling?' — Needs support':i===0?' — Best in class':'')+'</td>'
+      +'</tr>';
+  }
+  if(view==='class'){
+    var students=STUDENTS.filter(function(s){return !s.withdrawn&&(!cls||s.class_===cls);});
+    var ranked=students.map(function(s){var x=getAvg(s.id);return x?{s:s,avg:x.avg,cnt:x.cnt}:null;}).filter(Boolean).sort(function(a,b){return b.avg-a.avg;});
+    var groups={};ranked.forEach(function(x){if(!groups[x.s.class_])groups[x.s.class_]=[];groups[x.s.class_].push(x);});
+    if(!Object.keys(groups).length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3);">No results for this term. Add scores in Student Results first.</div>';return;}
+    var h='';
+    Object.keys(groups).sort().forEach(function(c){
+      h+='<div style="margin-bottom:24px;"><div style="font-size:14px;font-weight:800;color:var(--text);padding:10px 0;border-bottom:2px solid var(--border);margin-bottom:12px;">'+c+' — Class Rankings ('+term+')</div>'
+        +'<table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr style="background:var(--surface2);"><th style="padding:9px 12px;text-align:center;width:55px;">Pos.</th><th style="padding:9px 12px;text-align:left;">Student</th><th style="padding:9px 12px;text-align:center;">Average</th><th style="padding:9px 12px;text-align:center;">Grade</th><th style="padding:9px 12px;text-align:center;">Subjects</th><th style="padding:9px 12px;text-align:left;">Remark</th></tr></thead><tbody>'
+        +groups[c].map(function(x,i){return rankRow(x,i,false);}).join('')+'</tbody></table></div>';
+    });
+    el.innerHTML=h;
+  } else if(view==='subject'){
+    var allSubs=[...new Set(results.map(function(r){return r.subject;}))].sort();
+    var h=allSubs.map(function(sub){
+      var sr=results.filter(function(r){return r.subject===sub&&(!cls||r.class_===cls);}).sort(function(a,b){return b.score-a.score;});
+      if(!sr.length)return '';
+      return '<div style="margin-bottom:24px;"><div style="font-size:14px;font-weight:800;color:var(--text);padding:10px 0;border-bottom:2px solid var(--border);margin-bottom:12px;">'+sub+(cls?' — '+cls:'')+' ('+term+')</div>'
+        +'<table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr style="background:var(--surface2);"><th style="padding:9px 12px;text-align:center;width:55px;">Pos.</th><th style="padding:9px 12px;text-align:left;">Student</th><th style="padding:9px 12px;text-align:left;">Class</th><th style="padding:9px 12px;text-align:center;">Score</th><th style="padding:9px 12px;text-align:center;">Grade</th></tr></thead><tbody>'
+        +sr.map(function(r,i){
+          var g=calcGrade(r.score);
+          return '<tr style="border-top:1px solid var(--border);"><td style="padding:9px 12px;text-align:center;font-family:Space Grotesk,sans-serif;font-weight:800;font-size:16px;background:'+posBg(i)+';">"'+(i+1)+'</td><td style="padding:9px 12px;font-weight:700;">'+r.studentName+'</td><td style="padding:9px 12px;color:var(--text3);">'+r.class_+'</td><td style="padding:9px 12px;text-align:center;font-family:Space Grotesk,sans-serif;font-size:17px;font-weight:800;color:'+(r.score<cfg.strugglingBelow?'var(--red)':r.score>=cfg.distinctionAbove?'var(--green)':'var(--text)')+';">'+r.score+'%</td><td style="padding:9px 12px;text-align:center;font-weight:800;font-size:16px;font-family:Space Grotesk,sans-serif;color:'+(g.color||'var(--text)')+';">'+g.grade+'</td></tr>';
+        }).join('')+'</tbody></table></div>';
+    }).join('');
+    el.innerHTML=h||'<div style="text-align:center;padding:40px;color:var(--text3);">No results for this term.</div>';
+  } else {
+    var all=STUDENTS.filter(function(s){return !s.withdrawn;}).map(function(s){var x=getAvg(s.id);return x?{s:s,avg:x.avg,cnt:x.cnt}:null;}).filter(Boolean).sort(function(a,b){return b.avg-a.avg;});
+    if(!all.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3);">No results for this term.</div>';return;}
+    el.innerHTML='<div style="margin-bottom:12px;font-size:14px;font-weight:800;color:var(--text);">Whole School Rankings — '+term+' ('+all.length+' students)</div>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr style="background:var(--surface2);"><th style="padding:9px 12px;text-align:center;width:60px;">Rank</th><th style="padding:9px 12px;text-align:left;">Student</th><th style="padding:9px 12px;text-align:left;">Class</th><th style="padding:9px 12px;text-align:center;">Average</th><th style="padding:9px 12px;text-align:center;">Grade</th><th style="padding:9px 12px;text-align:center;">Subjects</th><th style="padding:9px 12px;text-align:left;">Remark</th></tr></thead><tbody>'
+      +all.map(function(x,i){return rankRow(x,i,true);}).join('')+'</tbody></table>';
+  }
+}
+async function exportRankingsExcel(){
+  if(typeof XLSX==='undefined') await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+  var wb=XLSX.utils.book_new();
+  var term=(document.getElementById('rankTermFilter')||{value:'Term 1'}).value;
+  var results=loadResults().filter(function(r){return r.term===term;});
+  var classes=[...new Set(STUDENTS.map(function(s){return s.class_;}).filter(Boolean))].sort();
+  classes.forEach(function(cls){
+    var students=STUDENTS.filter(function(s){return !s.withdrawn&&s.class_===cls;});
+    var subjects=[...new Set(results.filter(function(r){return r.class_===cls;}).map(function(r){return r.subject;}))].sort();
+    var ranked=students.map(function(s){var sr=results.filter(function(r){return r.studentId===s.id;});var avg=sr.length?(sr.reduce(function(a,r){return a+r.score;},0)/sr.length):null;return{s:s,avg:avg,sr:sr};}).filter(function(x){return x.avg!==null;}).sort(function(a,b){return b.avg-a.avg;});
+    if(!ranked.length)return;
+    var header=['Position','Student','ID'].concat(subjects).concat(['Average %','Grade']);
+    var rows=ranked.map(function(x,i){var g=calcGrade(x.avg);var row=[i+1,x.s.name,x.s.id];subjects.forEach(function(sub){var r=x.sr.find(function(r){return r.subject===sub;});row.push(r?r.score:'');});row.push(x.avg.toFixed(1)+'%',g.grade);return row;});
+    var ws=XLSX.utils.aoa_to_sheet([header].concat(rows));XLSX.utils.book_append_sheet(wb,ws,cls.substring(0,31));
+  });
+  XLSX.writeFile(wb,(SETTINGS.schoolName||'School').replace(/[^a-zA-Z0-9]/g,'_')+'_Rankings_'+term.replace(' ','_')+'.xlsx');
+  toast('Rankings exported','success');
+}
+async function exportResultsExcel(){
+  if(typeof XLSX==='undefined') await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+  var results=loadResults();
+  var ws=XLSX.utils.aoa_to_sheet([['Student','Class','ID','Subject','Score %','Grade','Remark','Term']].concat(results.map(function(r){return[r.studentName,r.class_,r.studentId,r.subject,r.score,r.grade,r.gradeLabel,r.term];})));
+  var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Results');
+  XLSX.writeFile(wb,(SETTINGS.schoolName||'School').replace(/[^a-zA-Z0-9]/g,'_')+'_Results.xlsx');
+  toast('Results exported','success');
+}
+
 // PWA — Service Worker + Install Prompt
 // 
 
