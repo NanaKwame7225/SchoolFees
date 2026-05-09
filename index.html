@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <!-- PWA Icons (inline SVG as data URI) -->
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%230a0a0f'/%3E%3Ctext y='140' x='96' text-anchor='middle' font-size='120' fill='%2300d4ff'%3E%3C/text%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
  :root {
  --bg: #f4f6f9;
@@ -207,7 +207,7 @@
  .stat-card.red::before { background:linear-gradient(90deg,var(--red),#f87171); }
  .stat-icon { font-size:28px; margin-bottom:10px; }
  .stat-label { font-size:11px; color:var(--text3); font-weight:600; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
- .stat-value { font-size:28px; font-weight:800; font-family:'Outfit','JetBrains Mono',monospace; }
+ .stat-value { font-size:28px; font-weight:800; font-family:'Inter','JetBrains Mono',monospace; }
  .stat-value.blue { color:var(--accent); }
  .stat-value.green { color:var(--green); }
  .stat-value.gold { color:var(--gold); }
@@ -231,7 +231,7 @@
  th { padding:12px 16px; text-align:left; font-weight:600; font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:0.8px; white-space:nowrap; }
  td { padding:12px 16px; border-top:1px solid var(--border); color:var(--text); white-space:nowrap; }
  tr:hover td { background:rgba(255,255,255,0.02); }
- .mono { font-family:'Outfit','JetBrains Mono',monospace; font-size:12px; }
+ .mono { font-family:'Inter','JetBrains Mono',monospace; font-size:12px; }
 
  /* STATUS BADGES */
  .status { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; }
@@ -294,7 +294,7 @@
  .chart-bar-label { width:80px; font-size:12px; color:var(--text2); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
  .chart-bar-track { flex:1; background:var(--surface2); border-radius:4px; height:24px; overflow:hidden; }
  .chart-bar-fill { height:100%; border-radius:4px; display:flex; align-items:center; padding:0 8px; font-size:11px; font-weight:600; color:#fff; transition:width 1s ease; min-width:0; }
- .chart-bar-val { width:60px; font-family:'Outfit',sans-serif; font-size:12px; color:var(--text2); }
+ .chart-bar-val { width:60px; font-family:'Inter',sans-serif; font-size:12px; color:var(--text2); }
 
  /* RECEIPT */
  .receipt { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:24px; font-size:13px; }
@@ -380,7 +380,7 @@
  .tag.female { background:rgba(124,58,237,0.1); color:#a78bfa; }
 
  /* Number font */
- .num { font-family:'Outfit',sans-serif; }
+ .num { font-family:'Inter',sans-serif; }
 
  /* Highlight */
  mark { background:rgba(0,212,255,0.2); color:var(--accent); border-radius:2px; padding:0 2px; }
@@ -909,11 +909,11 @@
 
  <!-- Summary stats -->
  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:20px;">
- <div class="stat-card"><div class="stat-value" id="attTodayPresent" style="font-family:'Outfit',sans-serif;">0</div><div class="stat-label">Present Today</div></div>
- <div class="stat-card"><div class="stat-value" id="attTodayAbsent" style="font-family:'Outfit',sans-serif;">0</div><div class="stat-label">Absent Today</div></div>
- <div class="stat-card"><div class="stat-value" id="attWeekRate" style="font-family:'Outfit',sans-serif;">0%</div><div class="stat-label">This Week Rate</div></div>
- <div class="stat-card"><div class="stat-value" id="attMonthRate" style="font-family:'Outfit',sans-serif;">0%</div><div class="stat-label">This Month Rate</div></div>
- <div class="stat-card"><div class="stat-value" id="attTermRate" style="font-family:'Outfit',sans-serif;">0%</div><div class="stat-label">This Term Rate</div></div>
+ <div class="stat-card"><div class="stat-value" id="attTodayPresent" style="font-family:'Inter',sans-serif;">0</div><div class="stat-label">Present Today</div></div>
+ <div class="stat-card"><div class="stat-value" id="attTodayAbsent" style="font-family:'Inter',sans-serif;">0</div><div class="stat-label">Absent Today</div></div>
+ <div class="stat-card"><div class="stat-value" id="attWeekRate" style="font-family:'Inter',sans-serif;">0%</div><div class="stat-label">This Week Rate</div></div>
+ <div class="stat-card"><div class="stat-value" id="attMonthRate" style="font-family:'Inter',sans-serif;">0%</div><div class="stat-label">This Month Rate</div></div>
+ <div class="stat-card"><div class="stat-value" id="attTermRate" style="font-family:'Inter',sans-serif;">0%</div><div class="stat-label">This Term Rate</div></div>
  </div>
 
  <!-- Class selector + date -->
@@ -958,9 +958,9 @@
 
  <!-- Summary stats -->
  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:20px;">
- <div class="stat-card"><div class="stat-value" id="sattTodayIn" style="font-family:'Outfit',sans-serif;">0</div><div class="stat-label">Signed In Today</div></div>
- <div class="stat-card"><div class="stat-value" id="sattTodayOut" style="font-family:'Outfit',sans-serif;">0</div><div class="stat-label">Signed Out</div></div>
- <div class="stat-card"><div class="stat-value" id="sattOnsite" style="font-family:'Outfit',sans-serif;">0</div><div class="stat-label">Currently Onsite</div></div>
+ <div class="stat-card"><div class="stat-value" id="sattTodayIn" style="font-family:'Inter',sans-serif;">0</div><div class="stat-label">Signed In Today</div></div>
+ <div class="stat-card"><div class="stat-value" id="sattTodayOut" style="font-family:'Inter',sans-serif;">0</div><div class="stat-label">Signed Out</div></div>
+ <div class="stat-card"><div class="stat-value" id="sattOnsite" style="font-family:'Inter',sans-serif;">0</div><div class="stat-label">Currently Onsite</div></div>
  </div>
 
  <!-- Date filter -->
@@ -994,7 +994,7 @@
  </div>
  </div>
  <div style="text-align:right;">
- <div id="kioskClock" style="font-family:'Outfit',sans-serif;font-size:40px;font-weight:800;color:#00d4ff;line-height:1;"></div>
+ <div id="kioskClock" style="font-family:'Inter',sans-serif;font-size:40px;font-weight:800;color:#00d4ff;line-height:1;"></div>
  <div id="kioskDay" style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;text-transform:uppercase;letter-spacing:1px;"></div>
  </div>
  </div>
@@ -1003,15 +1003,15 @@
  <div style="background:rgba(0,0,0,0.04);border-bottom:1px solid var(--border);padding:12px 32px;display:flex;gap:32px;flex-wrap:wrap;">
  <div style="display:flex;align-items:center;gap:8px;">
  <div style="width:10px;height:10px;border-radius:50%;background:#059669;"></div>
- <span style="font-size:13px;color:var(--text2);">Signed In: <strong id="kioskCountIn" style="color:var(--text);font-family:'Outfit',sans-serif;">0</strong></span>
+ <span style="font-size:13px;color:var(--text2);">Signed In: <strong id="kioskCountIn" style="color:var(--text);font-family:'Inter',sans-serif;">0</strong></span>
  </div>
  <div style="display:flex;align-items:center;gap:8px;">
  <div style="width:10px;height:10px;border-radius:50%;background:#0284c7;"></div>
- <span style="font-size:13px;color:var(--text2);">Signed Out: <strong id="kioskCountOut" style="color:var(--text);font-family:'Outfit',sans-serif;">0</strong></span>
+ <span style="font-size:13px;color:var(--text2);">Signed Out: <strong id="kioskCountOut" style="color:var(--text);font-family:'Inter',sans-serif;">0</strong></span>
  </div>
  <div style="display:flex;align-items:center;gap:8px;">
  <div style="width:10px;height:10px;border-radius:50%;background:#f59e0b;"></div>
- <span style="font-size:13px;color:var(--text2);">Not Yet: <strong id="kioskCountPending" style="color:var(--text);font-family:'Outfit',sans-serif;">0</strong></span>
+ <span style="font-size:13px;color:var(--text2);">Not Yet: <strong id="kioskCountPending" style="color:var(--text);font-family:'Inter',sans-serif;">0</strong></span>
  </div>
  </div>
 
@@ -1035,10 +1035,10 @@
  </div>
  <!-- Stats -->
  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:20px;">
- <div class="stat-card"><div class="stat-value" id="visOnsite" style="font-family:'Outfit',sans-serif;">0</div><div class="stat-label">Currently Onsite</div></div>
- <div class="stat-card"><div class="stat-value" id="visTodayTotal" style="font-family:'Outfit',sans-serif;">0</div><div class="stat-label">Visitors Today</div></div>
- <div class="stat-card"><div class="stat-value" id="visWeekTotal" style="font-family:'Outfit',sans-serif;">0</div><div class="stat-label">This Week</div></div>
- <div class="stat-card"><div class="stat-value" id="visMonthTotal" style="font-family:'Outfit',sans-serif;">0</div><div class="stat-label">This Month</div></div>
+ <div class="stat-card"><div class="stat-value" id="visOnsite" style="font-family:'Inter',sans-serif;">0</div><div class="stat-label">Currently Onsite</div></div>
+ <div class="stat-card"><div class="stat-value" id="visTodayTotal" style="font-family:'Inter',sans-serif;">0</div><div class="stat-label">Visitors Today</div></div>
+ <div class="stat-card"><div class="stat-value" id="visWeekTotal" style="font-family:'Inter',sans-serif;">0</div><div class="stat-label">This Week</div></div>
+ <div class="stat-card"><div class="stat-value" id="visMonthTotal" style="font-family:'Inter',sans-serif;">0</div><div class="stat-label">This Month</div></div>
  </div>
  <!-- ADMIN ENTRY FORM -->
  <div class="card" style="margin-bottom:20px;">
@@ -1111,7 +1111,7 @@
  </div>
  </div>
  <div style="text-align:right;">
- <div id="visKioskClock" style="font-family:'Outfit',sans-serif;font-size:40px;font-weight:800;color:#00d4ff;line-height:1;"></div>
+ <div id="visKioskClock" style="font-family:'Inter',sans-serif;font-size:40px;font-weight:800;color:#00d4ff;line-height:1;"></div>
  <div id="visKioskDate" style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;"></div>
  </div>
  </div>
@@ -1119,7 +1119,7 @@
  <!-- Onsite count -->
  <div style="background:rgba(0,0,0,0.04);border-bottom:1px solid var(--border);padding:12px 32px;display:flex;align-items:center;gap:12px;">
  <div style="width:8px;height:8px;border-radius:50%;background:#059669;"></div>
- <span style="font-size:13px;color:var(--text2);">Currently onsite: <strong id="visKioskOnsite" style="color:var(--text);font-family:'Outfit',sans-serif;">0</strong> visitor(s)</span>
+ <span style="font-size:13px;color:var(--text2);">Currently onsite: <strong id="visKioskOnsite" style="color:var(--text);font-family:'Inter',sans-serif;">0</strong> visitor(s)</span>
  </div>
 
  <div style="padding:24px 32px;max-width:800px;margin:0 auto;">
@@ -1600,7 +1600,7 @@
     </div>
     <div>
      <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px;">Score (0-100)</label>
-     <input type="number" id="scoreValueInput" placeholder="e.g. 78" min="0" max="100" style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;outline:none;">
+     <input type="number" id="scoreValueInput" placeholder="e.g. 78" min="0" max="100" style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;outline:none;">
     </div>
     <div>
      <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px;">Term</label>
@@ -1691,7 +1691,7 @@
  <!-- Preview -->
  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:16px;">
  <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Preview</div>
- <div id="idPreview" style="font-size:14px;font-weight:700;color:var(--accent);font-family:'Outfit',sans-serif;"></div>
+ <div id="idPreview" style="font-size:14px;font-weight:700;color:var(--accent);font-family:'Inter',sans-serif;"></div>
  <div style="font-size:11px;color:var(--text3);margin-top:4px;">Next student will receive this ID automatically</div>
  </div>
 
@@ -3163,6 +3163,12 @@ function showPage(p){
 // ===================== DASHBOARD =====================
 function _termCard(t, bal, pct){
  const barColor = t.color==='blue'?'var(--accent)':t.color==='green'?'var(--green)':'var(--gold)';
+ const displayPct = Math.min(100, pct);
+ const isOverpaid = bal < 0;
+ const overpayWarning = isOverpaid
+   ? `<div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.25);border-radius:8px;padding:8px 12px;margin-top:10px;font-size:11px;color:var(--red);font-weight:600;">
+       Overpayment detected — collected exceeds fees billed by ${ghs(Math.abs(bal))}. Please review fee settings for this term.
+      </div>` : '';
  return `<div class="stat-card ${t.color}" style="padding:20px;">
  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
  <div>
@@ -3173,14 +3179,15 @@ function _termCard(t, bal, pct){
  </div>
  <div style="margin-bottom:8px;">
  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px;">
- <span>Collected vs Billed</span><span style="font-weight:700;">${pct}%</span>
+ <span>Collected vs Billed</span><span style="font-weight:700;">${isOverpaid?'Overpaid':displayPct+'%'}</span>
  </div>
- <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:${barColor};"></div></div>
+ <div class="progress-wrap"><div class="progress-bar" style="width:${displayPct}%;background:${isOverpaid?'var(--red)':barColor};"></div></div>
  </div>
  <div style="display:flex;justify-content:space-between;font-size:12px;">
  <span style="color:var(--text2);">Billed: <strong style="color:var(--text);">${ghs(t.fees)}</strong></span>
- <span style="color:${bal>0?'var(--red)':'var(--green)'};">Bal: <strong>${ghs(bal)}</strong></span>
+ <span style="color:${bal>0?'var(--red)':isOverpaid?'var(--red)':'var(--green)'};">Bal: <strong>${ghs(bal)}</strong>${isOverpaid?' (Overpaid)':''}</span>
  </div>
+ ${overpayWarning}
  </div>`;
 }
 
@@ -3231,7 +3238,7 @@ function renderDashboard(){
  // Top summary stat cards
  document.getElementById('statsGrid').innerHTML=`
  <div class="stat-card blue"><div class="stat-label">Total Students</div><div class="stat-value blue">${totalStudents}</div><div class="stat-sub">${fullyPaid} fully paid · ${unpaid} unpaid</div></div>
- <div class="stat-card green"><div class="stat-label">Total Collected</div><div class="stat-value green">${ghs(totalPaid)}</div><div class="stat-sub">${(rate*100).toFixed(1)}% collection rate · all terms</div></div>
+ <div class="stat-card green"><div class="stat-label">Total Collected</div><div class="stat-value green">${ghs(totalPaid)}</div><div class="stat-sub">${Math.min(100,(rate*100)).toFixed(1)}% collection rate · all terms${rate>1?' (overpayment on some students)':''}</div></div>
  <div class="stat-card red"><div class="stat-label">Outstanding</div><div class="stat-value red">${ghs(totalBal)}</div><div class="stat-sub">From ${partPaid+unpaid} students · all terms</div></div>
  <div class="stat-card gold"><div class="stat-label">Total Fees Billed</div><div class="stat-value gold">${ghs(totalFees)}</div><div class="stat-sub">All 3 terms · ${totalStudents} students</div></div>
  `;
@@ -3266,9 +3273,9 @@ function renderDashboard(){
  return `<tr style="border-top:1px solid var(--border);">
  <td style="padding:8px 12px;font-weight:600;">${cls}</td>
  <td style="padding:8px 12px;text-align:center;color:var(--text3);">${cls_students.length}</td>
- <td style="padding:8px 12px;text-align:right;font-family:'Outfit',sans-serif;color:var(--gold);">${ghs(cf)}</td>
- <td style="padding:8px 12px;text-align:right;font-family:'Outfit',sans-serif;color:var(--green);">${ghs(cp)}</td>
- <td style="padding:8px 12px;text-align:right;font-family:'Outfit',sans-serif;color:${cb>0?'var(--red)':'var(--green)'};">${ghs(cb)}</td>
+ <td style="padding:8px 12px;text-align:right;font-family:'Inter',sans-serif;color:var(--gold);">${ghs(cf)}</td>
+ <td style="padding:8px 12px;text-align:right;font-family:'Inter',sans-serif;color:var(--green);">${ghs(cp)}</td>
+ <td style="padding:8px 12px;text-align:right;font-family:'Inter',sans-serif;color:${cb>0?'var(--red)':'var(--green)'};">${ghs(cb)}</td>
  <td style="padding:8px 12px;text-align:center;">
  <div style="display:flex;align-items:center;gap:6px;">
  <div style="flex:1;background:var(--surface2);border-radius:4px;height:6px;min-width:60px;"><div style="width:${pp}%;background:${pp>=100?'var(--green)':pp>50?'var(--gold)':'var(--red)'};height:100%;border-radius:4px;"></div></div>
@@ -3291,11 +3298,11 @@ function renderDashboard(){
  </div>
  <div style="margin-bottom:12px;">
  <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">COLLECTED</div>
- <div style="font-size:22px;font-weight:700;color:var(--green);font-family:'Outfit',sans-serif;">${ghs(t.paid)}</div>
+ <div style="font-size:22px;font-weight:700;color:var(--green);font-family:'Inter',sans-serif;">${ghs(t.paid)}</div>
  </div>
  <div style="margin-bottom:12px;">
  <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">BALANCE</div>
- <div style="font-size:18px;font-weight:700;color:${bal>0?'var(--red)':'var(--green)'};font-family:'Outfit',sans-serif;">${ghs(bal)}</div>
+ <div style="font-size:18px;font-weight:700;color:${bal>0?'var(--red)':'var(--green)'};font-family:'Inter',sans-serif;">${ghs(bal)}</div>
  </div>
  <div class="progress-wrap" style="margin-bottom:6px;"><div class="progress-bar" style="width:${pct}%;background:${t.color==='blue'?'var(--accent)':t.color==='green'?'var(--green)':'var(--gold)'}"></div></div>
  <div style="font-size:12px;font-weight:700;text-align:right;">${pct}% collected</div>
@@ -3319,9 +3326,9 @@ function renderDashboard(){
  <tr>
  <td style="padding:8px 12px;">TOTAL</td>
  <td style="padding:8px 12px;text-align:center;">${totalStudents}</td>
- <td style="padding:8px 12px;text-align:right;font-family:'Outfit',sans-serif;color:var(--gold);">${ghs(t.fees)}</td>
- <td style="padding:8px 12px;text-align:right;font-family:'Outfit',sans-serif;color:var(--green);">${ghs(t.paid)}</td>
- <td style="padding:8px 12px;text-align:right;font-family:'Outfit',sans-serif;color:${bal>0?'var(--red)':'var(--green)'};">${ghs(bal)}</td>
+ <td style="padding:8px 12px;text-align:right;font-family:'Inter',sans-serif;color:var(--gold);">${ghs(t.fees)}</td>
+ <td style="padding:8px 12px;text-align:right;font-family:'Inter',sans-serif;color:var(--green);">${ghs(t.paid)}</td>
+ <td style="padding:8px 12px;text-align:right;font-family:'Inter',sans-serif;color:${bal>0?'var(--red)':'var(--green)'};">${ghs(bal)}</td>
  <td style="padding:8px 12px;text-align:center;font-weight:700;">${pct}%</td>
  </tr>
  </tfoot>
@@ -3448,7 +3455,7 @@ function viewStudent(id){
  <!-- Info -->
  <div style="flex:1;">
  <div style="font-size:22px;font-weight:800;color:var(--text);">${s.name}</div>
- <div style="color:var(--accent);font-family:'Outfit',sans-serif;font-size:13px;margin-top:3px;">${s.id}</div>
+ <div style="color:var(--accent);font-family:'Inter',sans-serif;font-size:13px;margin-top:3px;">${s.id}</div>
  <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;">
  <span class="tag ${s.gender.toLowerCase()}">${s.gender}</span>
  <span style="background:var(--surface3);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;">${s.class_}</span>
@@ -3477,9 +3484,9 @@ function viewStudent(id){
  }).join('')}
  </div>
  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
- <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;">Total Fees</div><div style="font-size:18px;font-weight:700;font-family:'Outfit',sans-serif;">${ghs(s.tf)}</div></div>
- <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;">Total Paid</div><div style="font-size:18px;font-weight:700;font-family:'Outfit',sans-serif;color:var(--green);">${ghs(s.tp)}</div></div>
- <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;">Balance</div><div style="font-size:18px;font-weight:700;font-family:'Outfit',sans-serif;color:${s.tb>0?'var(--red)':'var(--green)'};">${ghs(s.tb)}</div></div>
+ <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;">Total Fees</div><div style="font-size:18px;font-weight:700;font-family:'Inter',sans-serif;">${ghs(s.tf)}</div></div>
+ <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;">Total Paid</div><div style="font-size:18px;font-weight:700;font-family:'Inter',sans-serif;color:var(--green);">${ghs(s.tp)}</div></div>
+ <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;">Balance</div><div style="font-size:18px;font-weight:700;font-family:'Inter',sans-serif;color:${s.tb>0?'var(--red)':'var(--green)'};">${ghs(s.tb)}</div></div>
  </div>
  `;
  openModal('viewStudentModal');
@@ -3602,8 +3609,8 @@ function updateStudentFeePreview(){
  document.getElementById('feePreviewContent').innerHTML = arrearStudents.length ? `
  <div style="padding:10px 14px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.25);border-radius:8px;margin-top:4px;">
  <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;"> Existing Arrears — ${cls}</div>
- ${arrearStudents.map(s=>{const c=calcStudent(s);return `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid rgba(239,68,68,0.1);"><span style="color:var(--text2);">${s.name} <span style="font-family:'Outfit',sans-serif;font-size:10px;color:var(--text3);">${s.id}</span></span><span style="color:var(--red);font-weight:700;font-family:'Outfit',sans-serif;">- ${ghs(c.tb)}</span></div>`;}).join('')}
- <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;padding-top:7px;margin-top:4px;border-top:1px dashed rgba(239,68,68,0.3);"><span style="color:var(--red);">Total Class Arrears</span><span style="color:var(--red);font-family:'Outfit',sans-serif;">${ghs(classArrears)}</span></div>
+ ${arrearStudents.map(s=>{const c=calcStudent(s);return `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid rgba(239,68,68,0.1);"><span style="color:var(--text2);">${s.name} <span style="font-family:'Inter',sans-serif;font-size:10px;color:var(--text3);">${s.id}</span></span><span style="color:var(--red);font-weight:700;font-family:'Inter',sans-serif;">- ${ghs(c.tb)}</span></div>`;}).join('')}
+ <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;padding-top:7px;margin-top:4px;border-top:1px dashed rgba(239,68,68,0.3);"><span style="color:var(--red);">Total Class Arrears</span><span style="color:var(--red);font-family:'Inter',sans-serif;">${ghs(classArrears)}</span></div>
  </div>` : `<div style="padding:8px 14px;background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.25);border-radius:8px;font-size:12px;color:var(--green);"> No arrears in ${cls}</div>`;
 }
 
@@ -3695,7 +3702,7 @@ function viewStaff(id){
  </div>
  <div style="flex:1;">
  <div style="font-size:20px;font-weight:800;">${s.name}</div>
- <div style="color:var(--accent);font-family:'Outfit',sans-serif;font-size:12px;margin-top:3px;">${s.id}</div>
+ <div style="color:var(--accent);font-family:'Inter',sans-serif;font-size:12px;margin-top:3px;">${s.id}</div>
  <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;">
  <span class="tag ${s.gender==='Female'?'female':'male'}">${s.gender}</span>
  <span style="background:var(--surface3);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;">${s.role}</span>
@@ -3914,7 +3921,7 @@ function generatePayslip(){
  </div>
  <div style="flex:1;">
  <div style="font-size:16px;font-weight:800;">${s.name}</div>
- <div style="font-size:12px;color:var(--accent);font-family:'Outfit',sans-serif;">${s.id}</div>
+ <div style="font-size:12px;color:var(--accent);font-family:'Inter',sans-serif;">${s.id}</div>
  <div style="font-size:12px;color:var(--text2);">${s.role}</div>
  </div>
  </div>
@@ -3936,7 +3943,7 @@ function generatePayslip(){
  <!-- Net Pay -->
  <div style="margin-top:14px;padding:14px;background:rgba(16,185,129,0.1);border:2px solid rgba(16,185,129,0.4);border-radius:10px;text-align:center;">
  <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Net Pay for ${period}</div>
- <div style="font-size:28px;font-weight:800;color:var(--green);font-family:'Outfit',sans-serif;">${ghs(net)}</div>
+ <div style="font-size:28px;font-weight:800;color:var(--green);font-family:'Inter',sans-serif;">${ghs(net)}</div>
  </div>
 
  <!-- Signature area -->
@@ -4072,7 +4079,7 @@ function paySearchFn(){
  if(!q){dd.style.display='none';return;}
  const matches=STUDENTS.filter(s=>s.name.toLowerCase().includes(q)||s.id.toLowerCase().includes(q)).slice(0,8);
  if(!matches.length){dd.style.display='none';return;}
- dd.innerHTML=matches.map(s=>`<div onclick="selectPayStudent('${s.id}')" style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);transition:background 0.1s;opacity:${s.withdrawn?'0.45':1};" onmouseover="this.style.background='var(--surface3)'" onmouseout="this.style.background=''"><strong>${s.name}</strong><span style="color:var(--text3);font-family:'Outfit',sans-serif;font-size:11px;">${s.id}</span> · ${s.class_}${s.withdrawn?' <span style="color:var(--red);font-size:10px;font-weight:700;">WITHDRAWN</span>':''}</div>`).join('');
+ dd.innerHTML=matches.map(s=>`<div onclick="selectPayStudent('${s.id}')" style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);transition:background 0.1s;opacity:${s.withdrawn?'0.45':1};" onmouseover="this.style.background='var(--surface3)'" onmouseout="this.style.background=''"><strong>${s.name}</strong><span style="color:var(--text3);font-family:'Inter',sans-serif;font-size:11px;">${s.id}</span> · ${s.class_}${s.withdrawn?' <span style="color:var(--red);font-size:10px;font-weight:700;">WITHDRAWN</span>':''}</div>`).join('');
  dd.style.display='block';
 }
 
@@ -4315,7 +4322,7 @@ function showReceipt(id, term){
  </div>
  <div style="flex:1;">
  <div style="font-size:16px;font-weight:800;color:var(--text);">${s.name}</div>
- <div style="font-size:12px;color:var(--accent);font-family:'Outfit',sans-serif;">${s.id}</div>
+ <div style="font-size:12px;color:var(--accent);font-family:'Inter',sans-serif;">${s.id}</div>
  <div style="font-size:12px;color:var(--text2);margin-top:2px;">${s.class_}</div>
  </div>
  </div>
@@ -4533,23 +4540,23 @@ function renderReports(){
  return `<tr style="border-top:1px solid var(--border);">
  <td style="padding:9px 12px;font-weight:600;">${c}</td>
  <td style="padding:9px 12px;text-align:center;color:var(--text3);">${count}</td>
- <td style="padding:9px 8px;text-align:right;font-family:'Outfit',sans-serif;color:var(--accent);">
+ <td style="padding:9px 8px;text-align:right;font-family:'Inter',sans-serif;color:var(--accent);">
  ${ghs(b1)}
  ${rates.t1>0?`<div style="font-size:9px;color:var(--text3);">${count}×${ghs(rates.t1)}</div>`:''}
  </td>
- <td style="padding:9px 8px;text-align:right;font-family:'Outfit',sans-serif;color:var(--green);">${ghs(p1)}</td>
- <td style="padding:9px 8px;text-align:right;font-family:'Outfit',sans-serif;color:var(--accent);">
+ <td style="padding:9px 8px;text-align:right;font-family:'Inter',sans-serif;color:var(--green);">${ghs(p1)}</td>
+ <td style="padding:9px 8px;text-align:right;font-family:'Inter',sans-serif;color:var(--accent);">
  ${ghs(b2)}
  ${rates.t2>0?`<div style="font-size:9px;color:var(--text3);">${count}×${ghs(rates.t2)}</div>`:''}
  </td>
- <td style="padding:9px 8px;text-align:right;font-family:'Outfit',sans-serif;color:var(--green);">${ghs(p2)}</td>
- <td style="padding:9px 8px;text-align:right;font-family:'Outfit',sans-serif;color:var(--gold);">
+ <td style="padding:9px 8px;text-align:right;font-family:'Inter',sans-serif;color:var(--green);">${ghs(p2)}</td>
+ <td style="padding:9px 8px;text-align:right;font-family:'Inter',sans-serif;color:var(--gold);">
  ${ghs(b3)}
  ${rates.t3>0?`<div style="font-size:9px;color:var(--text3);">${count}×${ghs(rates.t3)}</div>`:''}
  </td>
- <td style="padding:9px 8px;text-align:right;font-family:'Outfit',sans-serif;color:var(--green);">${ghs(p3)}</td>
- <td style="padding:9px 12px;text-align:right;font-family:'Outfit',sans-serif;font-weight:700;color:var(--gold);">${ghs(totalB)}</td>
- <td style="padding:9px 12px;text-align:right;font-family:'Outfit',sans-serif;font-weight:700;color:var(--green);">${ghs(totalP)}</td>
+ <td style="padding:9px 8px;text-align:right;font-family:'Inter',sans-serif;color:var(--green);">${ghs(p3)}</td>
+ <td style="padding:9px 12px;text-align:right;font-family:'Inter',sans-serif;font-weight:700;color:var(--gold);">${ghs(totalB)}</td>
+ <td style="padding:9px 12px;text-align:right;font-family:'Inter',sans-serif;font-weight:700;color:var(--green);">${ghs(totalP)}</td>
  </tr>`;
  }).join('')}
  </tbody>
@@ -4557,14 +4564,14 @@ function renderReports(){
  <tr style="background:var(--surface2);font-weight:700;border-top:2px solid var(--border);">
  <td style="padding:10px 12px;font-size:13px;">GRAND TOTAL</td>
  <td style="padding:10px 12px;text-align:center;">${all.length}</td>
- <td style="padding:10px 8px;text-align:right;font-family:'Outfit',sans-serif;color:var(--accent);font-size:13px;">${ghs(t1Billed)}</td>
- <td style="padding:10px 8px;text-align:right;font-family:'Outfit',sans-serif;color:var(--green);font-size:13px;">${ghs(t1Paid)}</td>
- <td style="padding:10px 8px;text-align:right;font-family:'Outfit',sans-serif;color:var(--accent);font-size:13px;">${ghs(t2Billed)}</td>
- <td style="padding:10px 8px;text-align:right;font-family:'Outfit',sans-serif;color:var(--green);font-size:13px;">${ghs(t2Paid)}</td>
- <td style="padding:10px 8px;text-align:right;font-family:'Outfit',sans-serif;color:var(--gold);font-size:13px;">${ghs(t3Billed)}</td>
- <td style="padding:10px 8px;text-align:right;font-family:'Outfit',sans-serif;color:var(--green);font-size:13px;">${ghs(t3Paid)}</td>
- <td style="padding:10px 12px;text-align:right;font-family:'Outfit',sans-serif;color:var(--gold);font-size:15px;">${ghs(fees)}</td>
- <td style="padding:10px 12px;text-align:right;font-family:'Outfit',sans-serif;color:var(--green);font-size:15px;">${ghs(paid)}</td>
+ <td style="padding:10px 8px;text-align:right;font-family:'Inter',sans-serif;color:var(--accent);font-size:13px;">${ghs(t1Billed)}</td>
+ <td style="padding:10px 8px;text-align:right;font-family:'Inter',sans-serif;color:var(--green);font-size:13px;">${ghs(t1Paid)}</td>
+ <td style="padding:10px 8px;text-align:right;font-family:'Inter',sans-serif;color:var(--accent);font-size:13px;">${ghs(t2Billed)}</td>
+ <td style="padding:10px 8px;text-align:right;font-family:'Inter',sans-serif;color:var(--green);font-size:13px;">${ghs(t2Paid)}</td>
+ <td style="padding:10px 8px;text-align:right;font-family:'Inter',sans-serif;color:var(--gold);font-size:13px;">${ghs(t3Billed)}</td>
+ <td style="padding:10px 8px;text-align:right;font-family:'Inter',sans-serif;color:var(--green);font-size:13px;">${ghs(t3Paid)}</td>
+ <td style="padding:10px 12px;text-align:right;font-family:'Inter',sans-serif;color:var(--gold);font-size:15px;">${ghs(fees)}</td>
+ <td style="padding:10px 12px;text-align:right;font-family:'Inter',sans-serif;color:var(--green);font-size:15px;">${ghs(paid)}</td>
  </tr>
  </tfoot>
  </table>
@@ -4606,12 +4613,12 @@ function advSearch(){
  <tr><th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;">ID</th><th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;">Name</th><th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;">Class</th><th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;">Total Fees</th><th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;">Paid</th><th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;">Balance</th><th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;">Status</th></tr>
  </thead>
  <tbody>${results.map(s=>`<tr style="border-top:1px solid var(--border);">
- <td style="padding:10px 14px;font-family:'Outfit',sans-serif;font-size:12px;color:var(--accent);">${s.id}</td>
+ <td style="padding:10px 14px;font-family:'Inter',sans-serif;font-size:12px;color:var(--accent);">${s.id}</td>
  <td style="padding:10px 14px;"><strong>${s.name}</strong></td>
  <td style="padding:10px 14px;">${s.class_}</td>
- <td style="padding:10px 14px;font-family:'Outfit',sans-serif;">${ghs(s.tf)}</td>
- <td style="padding:10px 14px;font-family:'Outfit',sans-serif;color:var(--green);">${ghs(s.tp)}</td>
- <td style="padding:10px 14px;font-family:'Outfit',sans-serif;color:${s.tb>0?'var(--red)':'var(--green)'};">${ghs(s.tb)}</td>
+ <td style="padding:10px 14px;font-family:'Inter',sans-serif;">${ghs(s.tf)}</td>
+ <td style="padding:10px 14px;font-family:'Inter',sans-serif;color:var(--green);">${ghs(s.tp)}</td>
+ <td style="padding:10px 14px;font-family:'Inter',sans-serif;color:${s.tb>0?'var(--red)':'var(--green)'};">${ghs(s.tb)}</td>
  <td style="padding:10px 14px;">${statusBadge(s.os)}</td>
  </tr>`).join('')}</tbody>
  </table>`;
@@ -4858,7 +4865,7 @@ function buildSettingsForm(){
  <div style="background:var(--surface2);border:1px solid var(--accent);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:16px;">
  <div>
  <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:4px;"> Student ID Preview</div>
- <div style="font-size:20px;font-weight:800;color:var(--accent);font-family:'Outfit',sans-serif;" id="idPreview">${initials}-0001</div>
+ <div style="font-size:20px;font-weight:800;color:var(--accent);font-family:'Inter',sans-serif;" id="idPreview">${initials}-0001</div>
  <div style="font-size:11px;color:var(--text3);margin-top:3px;">Format: <strong>INITIALS - NUMBER</strong> · Updates when you save</div>
  </div>
  </div>
@@ -4940,7 +4947,7 @@ function buildExportClassGrid(){
  return `<label style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.15s;font-size:13px;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor=this.querySelector('input').checked?'var(--accent)':'var(--border)'">
  <input type="checkbox" class="export-class-cb" value="${c}" checked onchange="updateExportCount()" style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;">
  <span style="flex:1;">${c}</span>
- <span style="font-size:11px;font-family:'Outfit',sans-serif;color:var(--text3);">${count}</span>
+ <span style="font-size:11px;font-family:'Inter',sans-serif;color:var(--text3);">${count}</span>
  </label>`;
  }).join('');
  updateExportCount();
@@ -5165,10 +5172,10 @@ function buildPromRow(s, cls){
  return `<tr id="prow_${s.id}" style="border-top:1px solid var(--border);background:${rowBg};">
  <td style="padding:11px 16px;">
  <div style="font-weight:600;">${s.name}</div>
- <div style="font-size:11px;color:var(--accent);font-family:'Outfit',sans-serif;">${s.id}</div>
+ <div style="font-size:11px;color:var(--accent);font-family:'Inter',sans-serif;">${s.id}</div>
  </td>
  <td style="padding:11px 16px;">${statusBadge(c.os)}</td>
- <td style="padding:11px 16px;font-family:'Outfit',sans-serif;font-size:12px;color:${c.tb>0?'var(--red)':'var(--green)'};">${c.tb>0?' '+ghs(c.tb):ghs(0)}</td>
+ <td style="padding:11px 16px;font-family:'Inter',sans-serif;font-size:12px;color:${c.tb>0?'var(--red)':'var(--green)'};">${c.tb>0?' '+ghs(c.tb):ghs(0)}</td>
  <td style="padding:11px 16px;" id="pdec_${s.id}">${buildDecBtns(s.id, cls)}</td>
  </tr>`;
 }
@@ -5240,7 +5247,7 @@ function promGoStep2(){
  ${['promote','repeat','graduate','withdraw'].map(d=>`
  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
  <div style="font-size:26px;">${cardIcon[d]}</div>
- <div style="font-size:22px;font-weight:800;font-family:'Outfit',sans-serif;color:${cardColor[d]};">${counts[d]}</div>
+ <div style="font-size:22px;font-weight:800;font-family:'Inter',sans-serif;color:${cardColor[d]};">${counts[d]}</div>
  <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.8px;">${d==='promote'?'Promoted':d==='repeat'?'Repeating':d==='graduate'?'Graduated':'Withdrawn'}</div>
  </div>`).join('')}
  </div>`;
@@ -5732,11 +5739,11 @@ function renderBulkTable(){
  <td style="padding:4px 6px;"><input id="br_con_${r.rowId}" value="${r.contact}" placeholder="0XX..." oninput="bulkReadRow(${r.rowId})"
  style="width:110px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Sora',sans-serif;font-size:12px;"></td>
  <td style="padding:4px 6px;"><input type="number" id="br_t1_${r.rowId}" value="${r.t1f}" oninput="bulkReadRow(${r.rowId})"
- style="width:72px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Outfit',sans-serif;font-size:12px;"></td>
+ style="width:72px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;"></td>
  <td style="padding:4px 6px;"><input type="number" id="br_t2_${r.rowId}" value="${r.t2f}" oninput="bulkReadRow(${r.rowId})"
- style="width:72px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Outfit',sans-serif;font-size:12px;"></td>
+ style="width:72px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;"></td>
  <td style="padding:4px 6px;"><input type="number" id="br_t3_${r.rowId}" value="${r.t3f}" oninput="bulkReadRow(${r.rowId})"
- style="width:72px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Outfit',sans-serif;font-size:12px;"></td>
+ style="width:72px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;"></td>
  <td style="padding:4px 6px;"><button onclick="bulkRemoveRow(${r.rowId})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:4px;"></button></td>
  </tr>`).join('');
  updateBulkCount();
@@ -5812,12 +5819,12 @@ function renderClassFeesSummary(){
  el.innerHTML = active.map(([cls,v])=>{
  const pct = v.fees?Math.round(v.paid/v.fees*100):0;
  const rateBilled = (v.rateT1+v.rateT2+v.rateT3)*v.count;
- const rateLabel = rateBilled>0?`<div style="font-size:11px;color:var(--text3);margin-bottom:2px;">Rate × Students: <span style="color:var(--accent);font-family:'Outfit',sans-serif;font-weight:700;">${ghs(rateBilled)}</span><span style="color:var(--text3);">(${v.count} × ${ghs(v.rateT1+v.rateT2+v.rateT3)})</span></div>`:'';
+ const rateLabel = rateBilled>0?`<div style="font-size:11px;color:var(--text3);margin-bottom:2px;">Rate × Students: <span style="color:var(--accent);font-family:'Inter',sans-serif;font-weight:700;">${ghs(rateBilled)}</span><span style="color:var(--text3);">(${v.count} × ${ghs(v.rateT1+v.rateT2+v.rateT3)})</span></div>`:'';
  return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;min-width:180px;">
  <div style="font-weight:700;font-size:13px;margin-bottom:6px;">${cls} <span style="font-size:11px;color:var(--text3);font-weight:400;">(${v.count} students)</span></div>
  ${rateLabel}
- <div style="font-size:12px;color:var(--text3);margin-bottom:2px;">Actual Billed: <span style="color:var(--red);font-family:'Outfit',sans-serif;font-weight:700;">${ghs(v.fees)}</span></div>
- <div style="font-size:12px;color:var(--text3);margin-bottom:6px;">Collected: <span style="color:var(--green);font-family:'Outfit',sans-serif;font-weight:700;">${ghs(v.paid)}</span></div>
+ <div style="font-size:12px;color:var(--text3);margin-bottom:2px;">Actual Billed: <span style="color:var(--red);font-family:'Inter',sans-serif;font-weight:700;">${ghs(v.fees)}</span></div>
+ <div style="font-size:12px;color:var(--text3);margin-bottom:6px;">Collected: <span style="color:var(--green);font-family:'Inter',sans-serif;font-weight:700;">${ghs(v.paid)}</span></div>
  <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:${pct>=100?'var(--green)':pct>50?'var(--gold)':'var(--red)'}"></div></div>
  <div style="font-size:10px;color:var(--text3);margin-top:4px;text-align:right;">${pct}% paid · Bal: <span style="color:${v.bal>0?'var(--red)':'var(--green)'};">${ghs(v.bal)}</span></div>
  </div>`;
@@ -5867,7 +5874,7 @@ function renderAuditLog(){
  el.innerHTML = sorted.map(e=>{
  const isFraud = e.action.includes('FRAUD')||e.action.includes('VIOLATION');
  return `<tr style="background:${isFraud?'rgba(239,68,68,0.07)':''};">
- <td style="padding:10px 14px;font-family:'Outfit',sans-serif;font-size:11px;color:var(--text3);">${e.time.replace('T',' ').slice(0,19)}</td>
+ <td style="padding:10px 14px;font-family:'Inter',sans-serif;font-size:11px;color:var(--text3);">${e.time.replace('T',' ').slice(0,19)}</td>
  <td style="padding:10px 14px;font-weight:600;color:var(--text2);">${e.user||'System'}</td>
  <td style="padding:10px 14px;"><span style="padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:${isFraud?'rgba(239,68,68,0.15)':'rgba(0,212,255,0.1)'};color:${isFraud?'var(--red)':'var(--accent)'};">${e.action}</span></td>
  <td style="padding:10px 14px;font-size:12px;color:var(--text2);">${e.detail}</td>
@@ -5988,11 +5995,11 @@ function renderDashClassPanel(){
  const sc=status==='Fully Paid'?'var(--green)':status==='Part Payment'?'var(--gold)':'var(--red)';
  return `<tr>
  <td style="padding:8px 12px;font-weight:600;">${s.name}</td>
- <td style="padding:8px 12px;font-family:'Outfit',sans-serif;color:var(--accent);font-size:11px;">${s.id}</td>
- <td style="padding:8px 12px;font-family:'Outfit',sans-serif;color:var(--red);">${ghs(cTF)}</td>
- <td style="padding:8px 12px;font-family:'Outfit',sans-serif;color:var(--green);">${ghs(cTP)}</td>
- <td style="padding:8px 12px;font-family:'Outfit',sans-serif;color:${cTB>0?'var(--red)':'var(--green)'};">${cTB>0?ghs(cTB):' Cleared'}</td>
- <td style="padding:8px 12px;font-family:'Outfit',sans-serif;color:${arrB>0?'var(--orange)':'var(--text3)'};">${arrB>0?' '+ghs(arrB):'—'}</td>
+ <td style="padding:8px 12px;font-family:'Inter',sans-serif;color:var(--accent);font-size:11px;">${s.id}</td>
+ <td style="padding:8px 12px;font-family:'Inter',sans-serif;color:var(--red);">${ghs(cTF)}</td>
+ <td style="padding:8px 12px;font-family:'Inter',sans-serif;color:var(--green);">${ghs(cTP)}</td>
+ <td style="padding:8px 12px;font-family:'Inter',sans-serif;color:${cTB>0?'var(--red)':'var(--green)'};">${cTB>0?ghs(cTB):' Cleared'}</td>
+ <td style="padding:8px 12px;font-family:'Inter',sans-serif;color:${arrB>0?'var(--orange)':'var(--text3)'};">${arrB>0?' '+ghs(arrB):'—'}</td>
  <td style="padding:8px 12px;"><span style="padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:${status==='Fully Paid'?'rgba(16,185,129,0.1)':status==='Part Payment'?'rgba(245,158,11,0.1)':'rgba(239,68,68,0.1)'};color:${sc};">${status}</span></td>
  </tr>`;
  }).join('');
@@ -6009,24 +6016,24 @@ function renderDashClassPanel(){
  </div>
  <div style="background:var(--surface2);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:14px;text-align:center;">
  <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;">${curTerm} Fees</div>
- <div style="font-size:20px;font-weight:800;color:var(--red);font-family:'Outfit',sans-serif;">${ghs(ctFees)}</div>
+ <div style="font-size:20px;font-weight:800;color:var(--red);font-family:'Inter',sans-serif;">${ghs(ctFees)}</div>
  </div>
  <div style="background:var(--surface2);border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:14px;text-align:center;">
  <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;">${curTerm} Collected</div>
- <div style="font-size:20px;font-weight:800;color:var(--green);font-family:'Outfit',sans-serif;">${ghs(ctPaid)}</div>
+ <div style="font-size:20px;font-weight:800;color:var(--green);font-family:'Inter',sans-serif;">${ghs(ctPaid)}</div>
  </div>
  <div style="background:var(--surface2);border:1px solid ${ctBal>0?'rgba(239,68,68,0.3)':'rgba(16,185,129,0.3)'};border-radius:10px;padding:14px;text-align:center;">
  <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;">${curTerm} Balance</div>
- <div style="font-size:20px;font-weight:800;color:${ctBal>0?'var(--red)':'var(--green)'};font-family:'Outfit',sans-serif;">${ctBal>0?ghs(ctBal):' Cleared'}</div>
+ <div style="font-size:20px;font-weight:800;color:${ctBal>0?'var(--red)':'var(--green)'};font-family:'Inter',sans-serif;">${ctBal>0?ghs(ctBal):' Cleared'}</div>
  </div>
  ${arrearsbal>0?`<div style="background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.35);border-radius:10px;padding:14px;text-align:center;">
  <div style="font-size:11px;color:var(--orange);text-transform:uppercase;margin-bottom:4px;"> Arrears</div>
- <div style="font-size:20px;font-weight:800;color:var(--orange);font-family:'Outfit',sans-serif;">${ghs(arrearsbal)}</div>
+ <div style="font-size:20px;font-weight:800;color:var(--orange);font-family:'Inter',sans-serif;">${ghs(arrearsbal)}</div>
  <div style="font-size:10px;color:var(--text3);">from prev. term(s)</div>
  </div>`:''}
  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
  <div style="font-size:11px;color:var(--text3);text-transform:uppercase;margin-bottom:4px;">All-Term Total</div>
- <div style="font-size:20px;font-weight:800;color:var(--text);font-family:'Outfit',sans-serif;">${ghs(totalPaid)} <span style="font-size:12px;color:var(--text3);">/ ${ghs(totalFees)}</span></div>
+ <div style="font-size:20px;font-weight:800;color:var(--text);font-family:'Inter',sans-serif;">${ghs(totalPaid)} <span style="font-size:12px;color:var(--text3);">/ ${ghs(totalFees)}</span></div>
  </div>
  </div>
  <!-- Progress bar for current term -->
@@ -6322,7 +6329,7 @@ function renderLevyPickList(){
  <div onclick="selectLevyToPay('${l.id}',this)" id="levyPickItem_${l.id}" style="padding:10px 14px;border:1px solid var(--border);border-radius:8px;cursor:pointer;min-width:160px;transition:all 0.15s;">
  <div style="font-size:14px;">${l.levyIcon} <strong>${l.levyName}</strong></div>
  <div style="font-size:11px;color:var(--text3);margin-top:2px;">Full Year · ${l.academicYear}</div>
- <div style="font-size:12px;color:var(--red);font-family:'Outfit',sans-serif;margin-top:4px;">Balance: ${ghs(l.bal)}</div>
+ <div style="font-size:12px;color:var(--red);font-family:'Inter',sans-serif;margin-top:4px;">Balance: ${ghs(l.bal)}</div>
  </div>`).join('');
 }
 
@@ -8090,8 +8097,8 @@ function renderResults(){
       +'<td style="padding:9px 12px;font-weight:700;">'+r.studentName+'</td>'
       +'<td style="padding:9px 12px;color:var(--text3);">'+r.class_+'</td>'
       +'<td style="padding:9px 12px;">'+r.subject+'</td>'
-      +'<td style="padding:9px 12px;text-align:center;font-family:Outfit,sans-serif;font-size:16px;font-weight:800;color:'+scoreCol+';">'+r.score+'%</td>'
-      +'<td style="padding:9px 12px;text-align:center;font-weight:800;font-size:16px;font-family:Outfit,sans-serif;color:'+(g.color||'var(--text)')+';">'+g.grade+'</td>'
+      +'<td style="padding:9px 12px;text-align:center;font-family:Inter,sans-serif;font-size:16px;font-weight:800;color:'+scoreCol+';">'+r.score+'%</td>'
+      +'<td style="padding:9px 12px;text-align:center;font-weight:800;font-size:16px;font-family:Inter,sans-serif;color:'+(g.color||'var(--text)')+';">'+g.grade+'</td>'
       +'<td style="padding:9px 12px;font-size:12px;color:var(--text3);">'+g.label+'</td>'
       +'<td style="padding:9px 12px;text-align:center;">'+statusHtml+'</td>'
       +'<td style="padding:9px 12px;text-align:center;"><button data-k="'+key+'" onclick="var p=decodeURIComponent(this.getAttribute(\"data-k\")).split(\"|\");deleteResult(p[0],p[1],p[2])" style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);color:var(--red);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;">Remove</button></td>'
@@ -8158,12 +8165,12 @@ function renderRankings(){
   function rankRow(x,i,showCls){
     var g=calcGrade(x.avg);var struggling=x.avg<cfg.strugglingBelow;
     return '<tr style="border-top:1px solid var(--border);">'
-      +'<td style="padding:9px 12px;text-align:center;font-family:Outfit,sans-serif;font-weight:800;font-size:16px;background:'+posBg(i)+';">"'+(i+1)+'</td>'
+      +'<td style="padding:9px 12px;text-align:center;font-family:Inter,sans-serif;font-weight:800;font-size:16px;background:'+posBg(i)+';">"'+(i+1)+'</td>'
       +'<td style="padding:9px 12px;font-weight:700;">'+x.s.name+'<br><span style="font-size:11px;color:var(--text3);font-weight:400;">'+x.s.id+'</span></td>'
       +(showCls?'<td style="padding:9px 12px;color:var(--text3);">'+x.s.class_+'</td>':'')
-      +'<td style="padding:9px 12px;text-align:center;font-family:Outfit,sans-serif;font-size:17px;font-weight:800;color:'+(struggling?'var(--red)':x.avg>=cfg.distinctionAbove?'var(--green)':'var(--text)')+';">'+x.avg.toFixed(1)+'%</td>'
-      +'<td style="padding:9px 12px;text-align:center;font-weight:800;font-size:16px;font-family:Outfit,sans-serif;color:'+(g.color||'var(--text)')+';">'+g.grade+'</td>'
-      +'<td style="padding:9px 12px;text-align:center;font-family:Outfit,sans-serif;font-weight:700;">'+x.cnt+'</td>'
+      +'<td style="padding:9px 12px;text-align:center;font-family:Inter,sans-serif;font-size:17px;font-weight:800;color:'+(struggling?'var(--red)':x.avg>=cfg.distinctionAbove?'var(--green)':'var(--text)')+';">'+x.avg.toFixed(1)+'%</td>'
+      +'<td style="padding:9px 12px;text-align:center;font-weight:800;font-size:16px;font-family:Inter,sans-serif;color:'+(g.color||'var(--text)')+';">'+g.grade+'</td>'
+      +'<td style="padding:9px 12px;text-align:center;font-family:Inter,sans-serif;font-weight:700;">'+x.cnt+'</td>'
       +'<td style="padding:9px 12px;font-size:12px;color:var(--text3);">'+g.label+(struggling?' — Needs support':i===0?' — Best in class':'')+'</td>'
       +'</tr>';
   }
@@ -8188,7 +8195,7 @@ function renderRankings(){
         +'<table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr style="background:var(--surface2);"><th style="padding:9px 12px;text-align:center;width:55px;">Pos.</th><th style="padding:9px 12px;text-align:left;">Student</th><th style="padding:9px 12px;text-align:left;">Class</th><th style="padding:9px 12px;text-align:center;">Score</th><th style="padding:9px 12px;text-align:center;">Grade</th></tr></thead><tbody>'
         +sr.map(function(r,i){
           var g=calcGrade(r.score);
-          return '<tr style="border-top:1px solid var(--border);"><td style="padding:9px 12px;text-align:center;font-family:Outfit,sans-serif;font-weight:800;font-size:16px;background:'+posBg(i)+';">"'+(i+1)+'</td><td style="padding:9px 12px;font-weight:700;">'+r.studentName+'</td><td style="padding:9px 12px;color:var(--text3);">'+r.class_+'</td><td style="padding:9px 12px;text-align:center;font-family:Outfit,sans-serif;font-size:17px;font-weight:800;color:'+(r.score<cfg.strugglingBelow?'var(--red)':r.score>=cfg.distinctionAbove?'var(--green)':'var(--text)')+';">'+r.score+'%</td><td style="padding:9px 12px;text-align:center;font-weight:800;font-size:16px;font-family:Outfit,sans-serif;color:'+(g.color||'var(--text)')+';">'+g.grade+'</td></tr>';
+          return '<tr style="border-top:1px solid var(--border);"><td style="padding:9px 12px;text-align:center;font-family:Inter,sans-serif;font-weight:800;font-size:16px;background:'+posBg(i)+';">"'+(i+1)+'</td><td style="padding:9px 12px;font-weight:700;">'+r.studentName+'</td><td style="padding:9px 12px;color:var(--text3);">'+r.class_+'</td><td style="padding:9px 12px;text-align:center;font-family:Inter,sans-serif;font-size:17px;font-weight:800;color:'+(r.score<cfg.strugglingBelow?'var(--red)':r.score>=cfg.distinctionAbove?'var(--green)':'var(--text)')+';">'+r.score+'%</td><td style="padding:9px 12px;text-align:center;font-weight:800;font-size:16px;font-family:Inter,sans-serif;color:'+(g.color||'var(--text)')+';">'+g.grade+'</td></tr>';
         }).join('')+'</tbody></table></div>';
     }).join('');
     el.innerHTML=h||'<div style="text-align:center;padding:40px;color:var(--text3);">No results for this term.</div>';
