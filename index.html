@@ -372,6 +372,13 @@
  @media(max-width:480px) {
  .stats-grid { grid-template-columns:1fr !important; }
  #headerLogout { display:none; }
+ [style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr !important; }
+ [style*="grid-template-columns:1fr 1fr 1fr"] { grid-template-columns:1fr 1fr !important; }
+ .term-tabs .term-tab { min-width:70px; font-size:12px; padding:8px 12px; }
+ }
+ @media(max-width:360px){
+ [style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr !important; }
+ [style*="grid-template-columns:1fr 1fr 1fr"] { grid-template-columns:1fr !important; }
  }
 
  /* TAGS */
