@@ -2658,12 +2658,29 @@ function doLogin(){
  initApp();
  })
  .catch(err=>{
+ const msg = err && err.message ? err.message : String(err);
+ if(msg.includes('EXPIRED')){
+   errEl.textContent = 'Subscription expired. Please contact your administrator to renew.';
+   errEl.style.display='block'; return;
+ }
+ if(msg.includes('INACTIVE')){
+   errEl.textContent = 'School account is inactive. Contact support.';
+   errEl.style.display='block'; return;
+ }
+ if(msg.includes('School not found')){
+   errEl.textContent = 'School not found. Check the URL has ?school=novelty';
+   errEl.style.display='block'; return;
+ }
+ if(msg.includes('NetworkError')||msg.includes('Failed to fetch')||msg.includes('Network')){
+   errEl.textContent = 'Cannot reach server. Check your internet connection and try again.';
+   errEl.style.display='block'; return;
+ }
  const remaining = recordFailedLogin();
  const lockCheck = checkLoginRateLimit();
  if(lockCheck){ errEl.textContent=lockCheck; }
- else { errEl.textContent = 'Invalid credentials'+(remaining>0?' ('+remaining+' attempt'+(remaining!==1?'s':'')+' remaining)':''); }
+ else { errEl.textContent = 'Invalid username or password.'+(remaining>0?' ('+remaining+' attempt'+(remaining!==1?'s':'')+' left)':''); }
  errEl.style.display='block';
- setTimeout(()=>errEl.style.display='none',4000);
+ setTimeout(()=>errEl.style.display='none',5000);
  })
  .finally(()=>{ if(btn){ btn.textContent=' LOGIN'; btn.disabled=false; } });
 }
