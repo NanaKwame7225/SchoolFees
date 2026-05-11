@@ -186,12 +186,12 @@
  .nav-item .badge { margin-left:auto; background:var(--accent); color:#fff; border-radius:10px; padding:2px 8px; font-size:10px; font-weight:700; }
 
  /* CONTENT */
- .content { flex:1; padding:20px 24px; overflow-y:auto; }
+ .content { flex:1; padding:0 20px 20px 20px; overflow-y:auto; }
 
  /* PAGE TITLES */
- .page-header { margin-bottom:28px; }
- .page-header h2 { font-size:22px; font-weight:700; color:var(--text); }
- .page-header p { font-size:13px; color:var(--text2); margin-top:4px; }
+ .page-header { margin-bottom:8px; }
+ .page-header h2 { font-size:20px; font-weight:700; color:var(--text); }
+ .page-header p { font-size:13px; color:var(--text2); margin-top:2px; }
 
  /* STAT CARDS */
  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:16px; margin-bottom:28px; }
@@ -394,7 +394,7 @@
 
  /* Page */
  .page { display:none; }
- .page.active { display:block; animation:fadeUp 0.3s ease; }
+ .page.active { display:block; animation:fadeUp 0.3s ease; padding-top:16px; }
 </style>
 </head>
 <body>
@@ -2212,22 +2212,21 @@
 
  <!-- LEVIES -->
  <div class="page" id="page-levies">
-  <div class="page-header" style="margin:0 0 12px 0;padding:0;">
-   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
-     <h2 style="margin:0;line-height:1.1;">Levies &amp; Extra Charges</h2>
-     <p style="margin:0;font-size:12px;color:var(--text2);">Textbooks, Stationery, PTA, Uniform, Excursion &amp; more</p>
-    </div>
-    <!-- Tabs inline with header -->
-    <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;flex-wrap:wrap;">
-     <button id="levyTab_assign" onclick="switchLevyTab('assign')" style="padding:6px 14px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Assign Levies</button>
-     <button id="levyTab_pay" onclick="switchLevyTab('pay')" style="padding:6px 14px;border:none;border-radius:8px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Record Payment</button>
-     <button id="levyTab_report" onclick="switchLevyTab('report')" style="padding:6px 14px;border:none;border-radius:8px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Levy Report</button>
-     <button id="levyTab_types" onclick="switchLevyTab('types')" style="padding:6px 14px;border:none;border-radius:8px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Manage Types</button>
-    </div>
+ <div class="page-header">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+   <div>
+    <h2>Levies &amp; Extra Charges</h2>
+    <p>Textbooks, Stationery, PTA, Uniform, Excursion &amp; more</p>
+   </div>
+   <!-- Tabs inline with header -->
+   <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;flex-wrap:wrap;">
+    <button id="levyTab_assign" onclick="switchLevyTab('assign')" style="padding:8px 18px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-family:'Sora',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Assign Levies</button>
+    <button id="levyTab_pay" onclick="switchLevyTab('pay')" style="padding:8px 18px;border:none;border-radius:8px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Record Payment</button>
+    <button id="levyTab_report" onclick="switchLevyTab('report')" style="padding:8px 18px;border:none;border-radius:8px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Levy Report</button>
+    <button id="levyTab_types" onclick="switchLevyTab('types')" style="padding:8px 18px;border:none;border-radius:8px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Manage Types</button>
    </div>
   </div>
- 
+ </div>
  <!-- ASSIGN LEVIES -->
  <div id="levyPanel_assign">
  <div class="card" style="margin-bottom:16px;">
