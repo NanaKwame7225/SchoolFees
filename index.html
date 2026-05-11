@@ -1759,10 +1759,17 @@
  <div class="card-title" style="margin-bottom:6px;"> School Logo</div>
  <p style="font-size:12px;color:var(--text2);margin-bottom:16px;">Appears on receipts, reports, and login screen.</p>
  <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
- <div id="logoPreviewWrap" style="width:90px;height:90px;border-radius:12px;border:2px dashed var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
- <img id="logoPreviewImg" src="" alt="" style="width:100%;height:100%;object-fit:contain;display:none;">
- <span id="logoPreviewPlaceholder" style="font-size:32px;"></span>
+ <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;">
+ <div id="logoPreviewWrap" style="width:100px;height:100px;border-radius:14px;border:2px dashed var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;transition:all .3s;cursor:pointer;" onclick="document.getElementById('logoFileInput').click()" title="Click to upload logo">
+  <img id="logoPreviewImg" src="" alt="" style="width:100%;height:100%;object-fit:contain;display:none;">
+  <span id="logoPreviewPlaceholder" style="font-size:32px;"></span>
+  <div id="logoHoverOverlay" style="position:absolute;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;border-radius:12px;flex-direction:column;gap:4px;">
+   <span style="font-size:18px;">&#128247;</span>
+   <span style="font-size:10px;font-weight:700;color:#fff;">Change</span>
+  </div>
  </div>
+ <div id="logoUploadStatus" style="font-size:10px;font-weight:600;color:var(--text3);text-align:center;max-width:110px;line-height:1.4;"></div>
+</div>
  <div>
  <input type="file" id="logoFileInput" accept="image/*" style="display:none;" onchange="handleLogoUpload(event)">
  <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -2669,24 +2676,42 @@ function applyLogoEverywhere(){
  // Login
  const loginImg = document.getElementById('loginLogoImg');
  const loginIcon = document.getElementById('loginLogoIcon');
- if(has){ loginImg.src=SCHOOL_LOGO; loginImg.style.display='block'; loginIcon.style.display='none'; }
- else { loginImg.style.display='none'; loginIcon.style.display='block'; }
+ if(loginImg && loginIcon){
+  if(has){ loginImg.src=SCHOOL_LOGO; loginImg.style.display='block'; loginIcon.style.display='none'; }
+  else { loginImg.style.display='none'; loginIcon.style.display='block'; }
+ }
  // Header
  const headerImg = document.getElementById('headerLogoImg');
  const headerIcon = document.getElementById('headerLogoIcon');
- if(has){ headerImg.src=SCHOOL_LOGO; headerImg.style.display='block'; headerIcon.style.display='none'; }
- else { headerImg.style.display='none'; headerIcon.style.display='block'; }
- // Settings preview
+ if(headerImg && headerIcon){
+  if(has){ headerImg.src=SCHOOL_LOGO; headerImg.style.display='block'; headerIcon.style.display='none'; }
+  else { headerImg.style.display='none'; headerIcon.style.display='block'; }
+ }
+ // School info preview
  const prevImg = document.getElementById('logoPreviewImg');
  const prevPlaceholder = document.getElementById('logoPreviewPlaceholder');
  const removeBtn = document.getElementById('removeLogoBtnSettings');
  const wrap = document.getElementById('logoPreviewWrap');
+ const statusEl = document.getElementById('logoUploadStatus');
+ const overlay = document.getElementById('logoHoverOverlay');
  if(has){
- prevImg.src=SCHOOL_LOGO; prevImg.style.display='block'; prevPlaceholder.style.display='none';
- removeBtn.style.display='inline-flex'; wrap.style.borderColor='var(--accent)'; wrap.style.borderStyle='solid';
+  if(prevImg){ prevImg.src=SCHOOL_LOGO; prevImg.style.display='block'; }
+  if(prevPlaceholder) prevPlaceholder.style.display='none';
+  if(removeBtn) removeBtn.style.display='inline-flex';
+  if(wrap){ wrap.style.borderColor='var(--accent)'; wrap.style.borderStyle='solid';
+   wrap.onmouseenter=function(){ if(overlay) overlay.style.display='flex'; };
+   wrap.onmouseleave=function(){ if(overlay) overlay.style.display='none'; };
+  }
+  if(statusEl){ statusEl.textContent='Logo active'; statusEl.style.color='var(--green)'; }
  } else {
- prevImg.style.display='none'; prevPlaceholder.style.display='block';
- removeBtn.style.display='none'; wrap.style.borderColor='var(--border)'; wrap.style.borderStyle='dashed';
+  if(prevImg) prevImg.style.display='none';
+  if(prevPlaceholder) prevPlaceholder.style.display='block';
+  if(removeBtn) removeBtn.style.display='none';
+  if(wrap){ wrap.style.borderColor='var(--border)'; wrap.style.borderStyle='dashed';
+   wrap.onmouseenter=null; wrap.onmouseleave=null;
+  }
+  if(overlay) overlay.style.display='none';
+  if(statusEl){ statusEl.textContent='Click to upload'; statusEl.style.color='var(--text3)'; }
  }
 }
 
@@ -4475,9 +4500,7 @@ function showReceipt(id, term){
  <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:${bal>0?'var(--gold)':'var(--green)'};"></div></div>
  <div style="text-align:right;font-size:11px;margin-top:4px;color:var(--text2);">${pct}% paid</div>
  </div>
- <div class="receipt-section-title">Bank Details</div>
- <div class="receipt-row"><span style="color:var(--text2);">Bank</span>${SETTINGS.bankName}</div>
- <div class="receipt-row"><span style="color:var(--text2);">Account Number</span><span class="mono">${SETTINGS.bankAccount}</span></div>
+
  <div style="text-align:center;margin-top:20px;padding-top:14px;border-top:1px dashed var(--border);font-size:11px;color:var(--text3);">
  This is an official receipt from <strong>${SETTINGS.schoolName}</strong><br>
  ${SETTINGS.address} · ${SETTINGS.phone}<br>
@@ -4799,7 +4822,7 @@ function renderClassFeeRatesTable(){
  <div class="card-title" style="display:flex;align-items:center;gap:10px;">
  Fee &amp; Levy Structure per Class
  </div>
- <div class="card-sub">Set fees and levies per class — auto-filled when registering new students.</div>
+ <div class="card-sub">Set the fees charged per class per term — these auto-fill when registering new students. Each class can have its own rates.</div>
  </div>
  </div>
 
@@ -4984,15 +5007,12 @@ function buildSettingsForm(){
  {key:'address',label:'Address',type:'text'},
  {key:'phone',label:'Phone',type:'text'},
  {key:'email',label:'Email',type:'email'},
- {key:'bankName',label:'Bank Name',type:'text'},
- {key:'bankAccount',label:'Bank Account',type:'text'},
+
  {key:'academicYear',label:'Academic Year',type:'text'},
  {key:'currentTerm',label:'Current Term',type:'select',options:['Term 1','Term 2','Term 3']},
  {key:'proprietorTitle',label:'Title',type:'select',options:['Proprietor','Proprietress']},
  {key:'proprietor',label:'Proprietor / Proprietress Name',type:'text'},
- {key:'t1Default',label:'Default Term 1 Fee (GHS)',type:'number'},
- {key:'t2Default',label:'Default Term 2 Fee (GHS)',type:'number'},
- {key:'t3Default',label:'Default Term 3 Fee (GHS)',type:'number'},
+
  ];
  const initials = SETTINGS.schoolInitials || 'NMS';
  document.getElementById('settingsForm').innerHTML=`
@@ -5014,7 +5034,7 @@ function buildSettingsForm(){
 }
 
 function saveSettings(){
- const keys=['schoolName','schoolInitials','address','phone','email','bankName','bankAccount','academicYear','currentTerm','proprietorTitle','proprietor','t1Default','t2Default','t3Default','mnotifyKey','mnotifySender'];
+ const keys=['schoolName','schoolInitials','address','phone','email','academicYear','currentTerm','proprietorTitle','proprietor','mnotifyKey','mnotifySender'];
  // Render class fee rates table after main form
  renderClassFeeRatesTable();
  // Populate SMS class filter
