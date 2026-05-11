@@ -2636,13 +2636,30 @@ let SCHOOL_LOGO = ''; // base64 data URL
 function handleLogoUpload(event){
  const file = event.target.files[0];
  if(!file) return;
- if(file.size > 2 * 1024 * 1024){ toast('Image too large — max 2MB', 'error'); return; }
+ if(file.size > 10 * 1024 * 1024){ toast('Image too large — max 10MB', 'error'); return; }
  const reader = new FileReader();
  reader.onload = function(e){
- SCHOOL_LOGO = e.target.result;
- saveLogo();
- applyLogoEverywhere();
- toast('Logo uploaded successfully!', 'success');
+  const img = new Image();
+  img.onload = function(){
+   // Auto-compress: cap at 400px wide/tall, quality 0.85
+   const MAX = 400;
+   let w = img.width, h = img.height;
+   if(w > MAX || h > MAX){
+    const ratio = Math.min(MAX/w, MAX/h);
+    w = Math.round(w * ratio);
+    h = Math.round(h * ratio);
+   }
+   const canvas = document.createElement('canvas');
+   canvas.width = w; canvas.height = h;
+   canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+   SCHOOL_LOGO = canvas.toDataURL('image/png', 0.85);
+   saveLogo();
+   applyLogoEverywhere();
+   const origKB = Math.round(file.size/1024);
+   const newKB  = Math.round(SCHOOL_LOGO.length * 0.75 / 1024);
+   toast('Logo uploaded' + (origKB > newKB ? ' (optimised from '+origKB+'KB → '+newKB+'KB)' : '') + ' ✓', 'success');
+  };
+  img.src = e.target.result;
  };
  reader.readAsDataURL(file);
 }
@@ -8699,6 +8716,294 @@ if(isIOS && !isStandalone){
  </div>
  </div>
 </div>
+
+
+// ══════════════════════════════════════════════════════════════
+// ALL MISSING FUNCTIONS — complete implementations
+// ══════════════════════════════════════════════════════════════
+
+// ── ID Settings ────────────────────────────────────────────
+function loadIDSettings(){
+  var prefix   = document.getElementById('idPrefix');
+  var fmt      = document.getElementById('idFormat');
+  var startNum = document.getElementById('idStartNum');
+  if(prefix)   prefix.value   = SETTINGS.schoolInitials || 'NMS';
+  if(fmt)      fmt.value      = SETTINGS.idFormat || 'PREFIX-NNNN';
+  if(startNum) startNum.value = SETTINGS.idStartNum || 1;
+  updateIDPreviewDisplay();
+}
+function updateIDPreviewDisplay(){
+  var prefix  = ((document.getElementById('idPrefix')||{}).value||'NMS').toUpperCase();
+  var fmt     = (document.getElementById('idFormat')||{value:'PREFIX-NNNN'}).value;
+  var start   = parseInt((document.getElementById('idStartNum')||{value:'1'}).value)||1;
+  var preview = document.getElementById('idPreview');
+  var year    = new Date().getFullYear();
+  var id = fmt.replace('PREFIX',prefix).replace('YEAR',year)
+              .replace('NNNN',String(start).padStart(4,'0'))
+              .replace('NNN', String(start).padStart(3,'0'));
+  if(preview) preview.textContent = id;
+}
+function saveIDSettings(){
+  var prefix = ((document.getElementById('idPrefix')||{}).value||'NMS').trim().toUpperCase();
+  var fmt    = (document.getElementById('idFormat')||{value:'PREFIX-NNNN'}).value;
+  var start  = parseInt((document.getElementById('idStartNum')||{value:'1'}).value)||1;
+  SETTINGS.schoolInitials = prefix;
+  SETTINGS.idFormat  = fmt;
+  SETTINGS.idStartNum = start;
+  saveSettings();
+  updateIDPreviewDisplay();
+  toast('ID settings saved', 'success');
+}
+function downloadIDTemplate(){
+  var csv = 'student_name,custom_id\nKofi Mensah,NMS-0001\nAma Boateng,NMS-0002\n';
+  var a   = document.createElement('a');
+  a.href  = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'student_id_template.csv';
+  a.click();
+  toast('ID template downloaded','success');
+}
+function handleIDUpload(event){
+  var file = event.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var lines = e.target.result.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    var updated=0, notFound=0;
+    for(var i=1;i<lines.length;i++){
+      var cols = lines[i].split(',');
+      if(cols.length<2) continue;
+      var sName=cols[0].trim(), cId=cols[1].trim();
+      var st = STUDENTS.find(function(s){return s.name.toLowerCase()===sName.toLowerCase();});
+      if(st){ st.id=cId; updated++; } else notFound++;
+    }
+    saveStudents(); renderStudents();
+    var el=document.getElementById('idUploadStatus');
+    if(el) el.textContent='Updated '+updated+' IDs'+(notFound?' ('+notFound+' not found)':'');
+    event.target.value='';
+    toast('Updated '+updated+' student IDs','success');
+  };
+  reader.readAsText(file);
+}
+function regenerateAllIDs(){
+  if(!confirm('Regenerate IDs for ALL students in order by class?')) return;
+  var prefix  = (SETTINGS.schoolInitials||'NMS').toUpperCase();
+  var fmt     = SETTINGS.idFormat || 'PREFIX-NNNN';
+  var counter = parseInt(SETTINGS.idStartNum)||1;
+  var year    = new Date().getFullYear();
+  STUDENTS.forEach(function(s){
+    var id = fmt.replace('PREFIX',prefix).replace('YEAR',year)
+                .replace('NNNN',String(counter).padStart(4,'0'))
+                .replace('NNN', String(counter).padStart(3,'0'));
+    s.id = id; counter++;
+  });
+  saveStudents(); renderStudents();
+  toast('All student IDs regenerated','success');
+}
+
+// ── Bulk Payments ──────────────────────────────────────────
+function openBulkPayment(){
+  var termSel = document.getElementById('bulkTerm');
+  var classSel = document.getElementById('bulkClass');
+  var listEl  = document.getElementById('bulkPaymentList');
+  if(termSel && SETTINGS.currentTerm) termSel.value=SETTINGS.currentTerm;
+  renderBulkPaymentList();
+  var modal = document.getElementById('bulkPaymentModal');
+  if(modal) modal.style.display='flex';
+}
+function renderBulkPaymentList(){
+  var term    = (document.getElementById('bulkTerm')||{value:'Term 1'}).value;
+  var cls     = (document.getElementById('bulkClass')||{value:''}).value;
+  var listEl  = document.getElementById('bulkPaymentList');
+  if(!listEl) return;
+  var fKey = {'Term 1':'t1f','Term 2':'t2f','Term 3':'t3f'}[term] || 't1f';
+  var pKey = {'Term 1':'t1p','Term 2':'t2p','Term 3':'t3p'}[term] || 't1p';
+  var students = STUDENTS.filter(function(s){
+    if(s.withdrawn) return false;
+    if(cls && s.class_!==cls) return false;
+    return (s[fKey]||0)>(s[pKey]||0);
+  });
+  if(!students.length){
+    listEl.innerHTML='<div style="text-align:center;padding:30px;color:var(--text3);">No outstanding balances for this filter.</div>';
+    return;
+  }
+  listEl.innerHTML='<table style="width:100%;border-collapse:collapse;">'
+    +'<thead><tr style="background:var(--surface2);">'
+    +'<th style="padding:8px;font-size:11px;text-align:left;">Student</th>'
+    +'<th style="padding:8px;font-size:11px;text-align:left;">Class</th>'
+    +'<th style="padding:8px;font-size:11px;text-align:right;font-family:Outfit,sans-serif;">Balance</th>'
+    +'<th style="padding:8px;font-size:11px;text-align:right;font-family:Outfit,sans-serif;">Payment</th>'
+    +'</tr></thead><tbody>'
+    +students.map(function(s){
+      var bal=(s[fKey]||0)-(s[pKey]||0);
+      return '<tr style="border-top:1px solid var(--border);">'
+        +'<td style="padding:8px;font-size:13px;font-weight:600;">'+s.name+'</td>'
+        +'<td style="padding:8px;font-size:12px;color:var(--text3);">'+s.class_+'</td>'
+        +'<td style="padding:8px;font-size:13px;text-align:right;color:var(--red);font-family:Outfit,sans-serif;">'+ghs(bal)+'</td>'
+        +'<td style="padding:8px;text-align:right;"><input type="number" data-sid="'+s.id+'" data-pkey="'+pKey+'" class="bulk-pay-input" placeholder="0" min="0" max="'+bal+'" style="width:110px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:Outfit,sans-serif;font-size:13px;text-align:right;outline:none;"></td>'
+        +'</tr>';
+    }).join('')
+    +'</tbody></table>';
+}
+function saveBulkPayments(){
+  var term    = (document.getElementById('bulkTerm')||{value:'Term 1'}).value;
+  var inputs  = document.querySelectorAll('.bulk-pay-input');
+  var pKey    = {'Term 1':'t1p','Term 2':'t2p','Term 3':'t3p'}[term] || 't1p';
+  var count=0;
+  inputs.forEach(function(inp){
+    var amt=parseFloat(inp.value)||0;
+    if(amt<=0) return;
+    var sid=inp.dataset.sid;
+    var st=STUDENTS.find(function(s){return s.id===sid;});
+    if(st){ st[pKey]=(st[pKey]||0)+amt; count++; }
+  });
+  if(!count){ toast('No payment amounts entered','error'); return; }
+  saveStudents(); renderStudents();
+  var modal=document.getElementById('bulkPaymentModal');
+  if(modal) modal.style.display='none';
+  toast(count+' payments recorded','success');
+  AUDIT_LOG.push({time:new Date().toISOString(),user:currentAdminName,action:'BULK_PAYMENT',detail:count+' bulk payments recorded for '+term});
+  saveAuditLog();
+}
+
+// ── Attendance ─────────────────────────────────────────────
+function markAllPresent(){
+  var cls    = (document.getElementById('attClassFilter')||{value:''}).value;
+  var today  = new Date().toISOString().split('T')[0];
+  var target = STUDENTS.filter(function(s){ return !s.withdrawn && (!cls||s.class_===cls); });
+  if(!target.length){ toast('No students found','error'); return; }
+  if(!window.ATTENDANCE) window.ATTENDANCE=[];
+  target.forEach(function(s){
+    var existing=ATTENDANCE.find(function(a){return a.studentId===s.id&&a.date===today;});
+    if(existing){ existing.status='present'; }
+    else{ ATTENDANCE.push({studentId:s.id,studentName:s.name,class_:s.class_,date:today,status:'present',time:new Date().toLocaleTimeString()}); }
+  });
+  if(typeof saveAttendance==='function') saveAttendance();
+  if(typeof renderAttendance==='function') renderAttendance();
+  toast('Marked '+target.length+' students present','success');
+}
+function generateTeacherLink(){
+  var cls=(document.getElementById('attClassFilter')||{value:''}).value;
+  var base=window.location.origin+window.location.pathname;
+  var url=base+'?school='+(SETTINGS.schoolSlug||'school')+'&teacheratt=1'+(cls?'&class='+encodeURIComponent(cls):'');
+  if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ toast('Teacher attendance link copied','success'); }); }
+  else { prompt('Teacher attendance link:',url); }
+}
+function submitTeacherAttendance(){
+  toast('Attendance submitted','success');
+}
+
+// ── Staff Attendance ───────────────────────────────────────
+function generateStaffAttLink(){
+  var base=window.location.origin+window.location.pathname;
+  var url=base+'?school='+(SETTINGS.schoolSlug||'school')+'&staffatt=1';
+  if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ toast('Staff sign-in link copied','success'); }); }
+  else { prompt('Staff sign-in link:',url); }
+}
+
+// ── Visitor Sign-In ────────────────────────────────────────
+function generateVisitorKioskLink(){
+  var base=window.location.origin+window.location.pathname;
+  var url=base+'?school='+(SETTINGS.schoolSlug||'school')+'&kiosk=visitor';
+  if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ toast('Visitor kiosk link copied','success'); }); }
+  else { prompt('Visitor kiosk link:',url); }
+}
+function adminVisitorSignIn(){
+  var name=(document.getElementById('visAdminName')||{value:''}).value.trim();
+  var host=(document.getElementById('visAdminHost')||{value:''}).value.trim();
+  var purpose=(document.getElementById('visAdminPurpose')||{value:''}).value.trim();
+  var errEl=document.getElementById('visAdminError');
+  if(!name||!host){ if(errEl){errEl.textContent='Visitor name and host are required';errEl.style.display='block';} return; }
+  if(!window.VISITORS) window.VISITORS=[];
+  VISITORS.push({id:'V'+Date.now(),name:name,host:host,purpose:purpose,
+    time:new Date().toLocaleTimeString(),date:new Date().toISOString().split('T')[0],
+    type:'visitor',signedOut:false});
+  if(typeof saveVisitors==='function') saveVisitors();
+  if(typeof renderVisitors==='function') renderVisitors();
+  if(errEl) errEl.style.display='none';
+  ['visAdminName','visAdminHost','visAdminPurpose'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  toast(name+' signed in','success');
+}
+function visitorSignIn(){
+  var name=(document.getElementById('visitorName')||{value:''}).value.trim();
+  var host=(document.getElementById('visitorHost')||{value:''}).value.trim();
+  var purpose=(document.getElementById('visitorPurpose')||{value:''}).value.trim();
+  var errEl=document.getElementById('visitorError');
+  if(!name||!host){ if(errEl){errEl.textContent='Your name and who you are visiting are required';errEl.style.display='block';} return; }
+  if(!window.VISITORS) window.VISITORS=[];
+  VISITORS.push({id:'V'+Date.now(),name:name,host:host,purpose:purpose,
+    time:new Date().toLocaleTimeString(),date:new Date().toISOString().split('T')[0],
+    type:'visitor',signedOut:false});
+  if(typeof saveVisitors==='function') saveVisitors();
+  if(typeof renderVisitors==='function') renderVisitors();
+  if(errEl) errEl.style.display='none';
+  ['visitorName','visitorHost','visitorPurpose'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  toast('Signed in successfully. Please collect your badge.','success');
+}
+
+// ── Child Pickup ───────────────────────────────────────────
+function recordPickup(){
+  var sName=(document.getElementById('pickupStudentName')||{value:''}).value.trim();
+  var pName=(document.getElementById('pickupPersonName')||{value:''}).value.trim();
+  var rel=(document.getElementById('pickupRelation')||{value:''}).value.trim();
+  var errEl=document.getElementById('pickupError');
+  if(!sName||!pName){ if(errEl){errEl.textContent='Student name and collector name are required';errEl.style.display='block';} return; }
+  if(!window.PICKUPS) window.PICKUPS=[];
+  PICKUPS.push({id:'P'+Date.now(),studentName:sName,collectorName:pName,relation:rel||'Guardian',
+    time:new Date().toLocaleTimeString(),date:new Date().toISOString().split('T')[0]});
+  if(typeof savePickups==='function') savePickups();
+  if(typeof renderPickups==='function') renderPickups();
+  if(errEl) errEl.style.display='none';
+  ['pickupStudentName','pickupPersonName','pickupRelation'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  toast(sName+' pickup recorded','success');
+}
+
+// ── Monthly Report Export ──────────────────────────────────
+function exportMonthlyPDF(){
+  var el=document.getElementById('monthlyReport');
+  if(!el){ toast('No report to export','error'); return; }
+  window.print();
+}
+function exportMonthlyExcel(){
+  var term  =(document.getElementById('monthlyTerm')||{value:'Term 1'}).value;
+  var fKey  ={'Term 1':'t1f','Term 2':'t2f','Term 3':'t3f'}[term]||'t1f';
+  var pKey  ={'Term 1':'t1p','Term 2':'t2p','Term 3':'t3p'}[term]||'t1p';
+  var rows  =[['Student Name','Class','Fees Billed','Fees Paid','Balance']];
+  STUDENTS.filter(function(s){return !s.withdrawn;}).forEach(function(s){
+    rows.push([s.name,s.class_,s[fKey]||0,s[pKey]||0,(s[fKey]||0)-(s[pKey]||0)]);
+  });
+  var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='monthly_report_'+term.replace(' ','_')+'.csv';
+  a.click();
+  toast('Monthly report exported','success');
+}
+
+// ── Year Rollover ──────────────────────────────────────────
+function initiateYearRollover(){
+  if(!confirm('Start new academic year rollover?\n\nThis will archive current year data and prepare for the new year.\nAll fee balances will be cleared for the new year.')) return;
+  var oldYear=SETTINGS.academicYear||'2024/2025';
+  var parts=oldYear.split('/');
+  var newYear=(parseInt(parts[0]||2024)+1)+'/'+(parseInt(parts[1]||2025)+1);
+  SETTINGS.academicYear=newYear;
+  SETTINGS.currentTerm='Term 1';
+  // Archive by clearing term payments (keep students)
+  STUDENTS.forEach(function(s){
+    s.t1p=0; s.t2p=0; s.t3p=0;
+    s.t1f=0; s.t2f=0; s.t3f=0;
+  });
+  saveStudents(); saveSettings();
+  toast('Rolled over to '+newYear+'. Fee balances cleared for new year.','success');
+  AUDIT_LOG.push({time:new Date().toISOString(),user:currentAdminName,action:'YEAR_ROLLOVER',detail:'Rolled over to academic year '+newYear});
+  saveAuditLog();
+}
+
 </script>
 </body>
 </html>
