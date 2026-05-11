@@ -186,12 +186,12 @@
  .nav-item .badge { margin-left:auto; background:var(--accent); color:#fff; border-radius:10px; padding:2px 8px; font-size:10px; font-weight:700; }
 
  /* CONTENT */
- .content { flex:1; padding:20px 24px; overflow-y:auto; }
+ .content { flex:1; padding:14px 20px 20px 20px; overflow-y:auto; }
 
  /* PAGE TITLES */
- .page-header { margin-bottom:28px; }
- .page-header h2 { font-size:22px; font-weight:700; color:var(--text); }
- .page-header p { font-size:13px; color:var(--text2); margin-top:4px; }
+ .page-header { margin-bottom:8px; }
+ .page-header h2 { font-size:20px; font-weight:700; color:var(--text); }
+ .page-header p { font-size:13px; color:var(--text2); margin-top:2px; }
 
  /* STAT CARDS */
  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:16px; margin-bottom:28px; }
@@ -395,6 +395,7 @@
  /* Page */
  .page { display:none; }
  .page.active { display:block; animation:fadeUp 0.3s ease; }
+ #page-levies.active { padding-top:0 !important; margin-top:0 !important; }
 </style>
 </head>
 <body>
@@ -576,6 +577,10 @@
  <div class="nav-item" onclick="showPage('documents')">Documents <span class="badge" id="docBadge" style="background:rgba(0,212,255,0.2);color:var(--accent);">0</span></div>
  <div class="nav-item" onclick="showPage('staffportal')">Staff Portal</div>
  <div class="nav-item" onclick="showPage('staffmessenger')">Staff Messenger</div>
+ </div>
+ <div class="nav-section">
+ <div class="nav-label">Communications</div>
+ <div class="nav-item" onclick="showPage('smsblast')">SMS Blast <span class="badge" id="smsBadge" style="background:rgba(16,185,129,0.2);color:var(--green);">Parents</span></div>
  </div>
  <div class="nav-section">
  <div class="nav-label">System</div>
@@ -1448,6 +1453,114 @@
  <div id="portalContent"></div>
  </div>
 
+ <!-- SMS BLAST PAGE -->
+ <div class="page" id="page-smsblast">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+   <div>
+    <div style="font-size:18px;font-weight:800;color:var(--text);">SMS Blast</div>
+    <div style="font-size:12px;color:var(--text3);">Send fee reminders and announcements directly to parents and guardians</div>
+   </div>
+   <div style="display:flex;gap:6px;flex-wrap:wrap;">
+    <span id="smsApiStatus" style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(5,150,105,0.1);color:var(--green);">Mnotify Ready</span>
+   </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+   <!-- LEFT: Compose & Send -->
+   <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <!-- Quick Stats -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+     <div class="stat-card" style="padding:14px;text-align:center;">
+      <div class="stat-value green" style="font-size:20px;" id="smsBlastTotalParents">0</div>
+      <div class="stat-label">Parents with Contact</div>
+     </div>
+     <div class="stat-card" style="padding:14px;text-align:center;">
+      <div class="stat-value red" style="font-size:20px;" id="smsBlastOutstanding">0</div>
+      <div class="stat-label">Outstanding Balances</div>
+     </div>
+     <div class="stat-card" style="padding:14px;text-align:center;">
+      <div class="stat-value gold" style="font-size:20px;" id="smsBlastNoContact">0</div>
+      <div class="stat-label">No Contact</div>
+     </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card" style="padding:18px;">
+     <div class="card-title" style="margin-bottom:12px;">Recipients</div>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div>
+       <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px;">Term</label>
+       <select id="smsBlastTerm" onchange="updateSmsBlastPreview()" style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+        <option value="Term 1">Term 1</option>
+        <option value="Term 2">Term 2</option>
+        <option value="Term 3">Term 3</option>
+       </select>
+      </div>
+      <div>
+       <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px;">Class</label>
+       <select id="smsBlastClass" onchange="updateSmsBlastPreview()" style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+        <option value="">All Classes</option>
+       </select>
+      </div>
+     </div>
+     <div style="margin-bottom:10px;">
+      <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px;">Send To</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+       <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">
+        <input type="radio" name="smsBlastTarget" value="outstanding" checked onchange="updateSmsBlastPreview()" style="accent-color:var(--accent);">
+        Outstanding Only
+       </label>
+       <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">
+        <input type="radio" name="smsBlastTarget" value="all" onchange="updateSmsBlastPreview()" style="accent-color:var(--accent);">
+        All Parents
+       </label>
+      </div>
+     </div>
+    </div>
+
+    <!-- Message Template -->
+    <div class="card" style="padding:18px;">
+     <div class="card-title" style="margin-bottom:12px;">Message</div>
+     <div style="margin-bottom:10px;">
+      <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px;">Template</label>
+      <select id="smsBlastTemplateSelect" onchange="loadSmsBlastTemplate()" style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+       <option value="reminder">Fee Reminder</option>
+       <option value="custom">Custom Message</option>
+      </select>
+     </div>
+     <div style="margin-bottom:6px;">
+      <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px;">Message Text</label>
+      <textarea id="smsBlastMessage" rows="5" oninput="updateSmsBlastPreview()" style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:vertical;line-height:1.6;"></textarea>
+     </div>
+     <div id="smsBlastCharCount" style="font-size:11px;color:var(--text3);text-align:right;margin-bottom:10px;"></div>
+     <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">
+      Placeholders: <code style="background:rgba(0,212,255,0.1);padding:1px 5px;border-radius:3px;color:var(--accent);">{parent}</code>
+      <code style="background:rgba(0,212,255,0.1);padding:1px 5px;border-radius:3px;color:var(--accent);">{name}</code>
+      <code style="background:rgba(0,212,255,0.1);padding:1px 5px;border-radius:3px;color:var(--accent);">{class}</code>
+      <code style="background:rgba(0,212,255,0.1);padding:1px 5px;border-radius:3px;color:var(--accent);">{balance}</code>
+      <code style="background:rgba(0,212,255,0.1);padding:1px 5px;border-radius:3px;color:var(--accent);">{term}</code>
+      <code style="background:rgba(0,212,255,0.1);padding:1px 5px;border-radius:3px;color:var(--accent);">{school}</code>
+     </div>
+     <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="sendSmsBlast()" id="smsBlastSendBtn">
+      Send SMS to All Recipients
+     </button>
+    </div>
+   </div>
+
+   <!-- RIGHT: Recipients Preview -->
+   <div class="card" style="padding:18px;max-height:700px;display:flex;flex-direction:column;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-shrink:0;">
+     <div class="card-title">Recipients Preview</div>
+     <span id="smsBlastCount" style="font-size:12px;font-weight:700;color:var(--accent);"></span>
+    </div>
+    <div id="smsBlastPreviewList" style="overflow-y:auto;flex:1;"></div>
+   </div>
+
+  </div>
+ </div>
+
  <!-- MONTHLY REPORT -->
  <div class="page" id="page-monthlyreport">
  <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
@@ -1979,151 +2092,7 @@
  </div>
  </div>
 
- <!-- LEVIES -->
- <div class="page" id="page-levies">
-  <div class="page-header" style="margin:0 0 12px 0;padding:0;">
-   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
-     <h2 style="margin:0;line-height:1.1;">Levies &amp; Extra Charges</h2>
-     <p style="margin:0;font-size:12px;color:var(--text2);">Textbooks, Stationery, PTA, Uniform, Excursion &amp; more</p>
-    </div>
-    <!-- Tabs inline with header -->
-    <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;flex-wrap:wrap;">
-     <button id="levyTab_assign" onclick="switchLevyTab('assign')" style="padding:6px 14px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Assign Levies</button>
-     <button id="levyTab_pay" onclick="switchLevyTab('pay')" style="padding:6px 14px;border:none;border-radius:8px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Record Payment</button>
-     <button id="levyTab_report" onclick="switchLevyTab('report')" style="padding:6px 14px;border:none;border-radius:8px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Levy Report</button>
-     <button id="levyTab_types" onclick="switchLevyTab('types')" style="padding:6px 14px;border:none;border-radius:8px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Manage Types</button>
-    </div>
-   </div>
-  </div>
- 
- <!-- ASSIGN LEVIES -->
- <div id="levyPanel_assign">
- <div class="card" style="margin-bottom:16px;">
- <div class="card-header">
- <div><div class="card-title"> Assign Levy to Students</div><div class="card-sub">Assign one levy to an individual student or an entire class at once</div></div>
- </div>
- <div class="form-grid" style="margin-top:12px;">
- <div class="form-field">
- <label>Levy Type *</label>
- <select id="assignLevyType" onchange="updateAssignAmount()">
- <option value="">— Select levy —</option>
- </select>
- </div>
- <div class="form-field">
- <label>Amount (GHS) *</label>
- <input type="number" id="assignLevyAmount" min="0" step="0.01" placeholder="0.00">
- </div>
- <div class="form-field">
- <label>Academic Year</label>
- <input type="text" id="assignLevyYear" placeholder="e.g. 2024/2025">
- <div style="font-size:11px;color:var(--text3);margin-top:4px;">Levies cover the full academic year — not per term</div>
- </div>
- </div>
- <div style="margin-top:4px;border-top:1px solid var(--border);padding-top:14px;">
- <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;">Assign To:</div>
- <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
- <div class="form-field" style="margin:0;min-width:180px;">
- <label style="font-size:11px;">Assign to entire Class</label>
- <select id="assignLevyClass">
- <option value="">— Select class —</option>
- </select>
- </div>
- <button class="btn btn-primary" onclick="assignLevyToClass()" style="height:40px;"> Assign to Class</button>
- <span style="color:var(--text3);font-size:12px;align-self:center;">or</span>
- <div class="form-field" style="margin:0;min-width:220px;">
- <label style="font-size:11px;">Assign to specific Student</label>
- <input type="text" id="assignLevyStudentSearch" placeholder="Search student..." oninput="levyStudentSearchFn()" autocomplete="off">
- <div id="assignLevyStudentDrop" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;max-height:140px;overflow-y:auto;display:none;margin-top:4px;position:absolute;z-index:100;min-width:240px;"></div>
- </div>
- <div style="align-self:flex-end;">
- <div style="font-size:11px;color:var(--text3);margin-bottom:4px;" id="assignLevyStudentName">No student selected</div>
- <button class="btn btn-secondary" onclick="assignLevyToStudent()" style="height:36px;"> Assign to Student</button>
- </div>
- </div>
- </div>
- </div>
-
- <!-- Assigned levies list -->
- <div class="card">
- <div class="card-header">
- <div><div class="card-title"> All Assigned Levies</div><div class="card-sub" id="levyAssignedSub"></div></div>
- <div style="display:flex;gap:8px;">
- <select id="levyFilterClass" onchange="renderAssignedLevies()" style="padding:7px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:12px;">
- <option value="">All Classes</option>
- </select>
- <select id="levyFilterType" onchange="renderAssignedLevies()" style="padding:7px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:12px;">
- <option value="">All Types</option>
- </select>
- <select id="levyFilterStatus" onchange="renderAssignedLevies()" style="padding:7px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:12px;">
- <option value="">All Status</option>
- <option>Unpaid</option><option>Part Payment</option><option>Fully Paid</option>
- </select>
- </div>
- </div>
- <div class="table-wrap">
- <table>
- <thead><tr>
- <th>Student</th><th>Class</th><th>Levy</th><th>Year</th>
- <th>Amount</th><th>Paid</th><th>Balance</th><th>Status</th><th></th>
- </tr></thead>
- <tbody id="assignedLeviesBody"></tbody>
- </table>
- </div>
- </div>
- </div>
-
- <!-- RECORD LEVY PAYMENT -->
- <div id="levyPanel_pay" style="display:none;">
- <div class="card">
- <div class="card-header">
- <div><div class="card-title"> Record Levy Payment</div><div class="card-sub">Pay off an assigned levy for a student</div></div>
- </div>
- <div class="form-grid" style="margin-top:12px;">
- <div class="form-field full">
- <label>Student *</label>
- <input type="text" id="levyPayStudentSearch" placeholder="Type student name or ID..." oninput="levyPaySearchFn()" autocomplete="off">
- <div id="levyPayStudentDrop" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;max-height:160px;overflow-y:auto;display:none;margin-top:4px;"></div>
- </div>
- <div class="form-field full" id="levyPayPickWrap" style="display:none;">
- <label>Select Levy to Pay *</label>
- <div id="levyPayPickList" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
- </div>
- <div class="form-field"><label>Amount (GHS) *</label><input type="number" id="levyPayAmount" min="0" step="0.01" placeholder="0.00"></div>
- <div class="form-field"><label>Date</label><input type="date" id="levyPayDate"></div>
- <div class="form-field"><label>Payment Mode</label><select id="levyPayMode"><option>Cash</option><option>Mobile Money (MoMo)</option><option>Bank Transfer</option><option>Cheque</option></select></div>
- <div class="form-field"><label>Cashier <span style="font-size:10px;color:var(--green);"></span></label><input type="text" id="levyPayCashier" readonly style="background:var(--surface3);color:var(--text2);cursor:not-allowed;"></div>
- <div class="form-field full"><label>Remarks</label><input type="text" id="levyPayRemarks" placeholder="Optional"></div>
- </div>
- <div style="margin-top:16px;text-align:right;">
- <button class="btn btn-primary" onclick="saveLevyPayment()"> Record Levy Payment</button>
- </div>
- </div>
- </div>
-
- <!-- LEVY REPORT -->
- <div id="levyPanel_report" style="display:none;">
- <div id="levyReportContent"></div>
- </div>
-
- <!-- MANAGE LEVY TYPES -->
- <div id="levyPanel_types" style="display:none;">
- <div class="card">
- <div class="card-header">
- <div><div class="card-title"> Levy Types</div><div class="card-sub">Configure the types of levies your school charges</div></div>
- <button class="btn btn-primary btn-sm" onclick="openAddLevyType()"> Add Type</button>
- </div>
- <div class="table-wrap" style="margin-top:12px;">
- <table>
- <thead><tr><th>#</th><th>Icon</th><th>Name</th><th>Default Amount</th><th>Note</th><th>Actions</th></tr></thead>
- <tbody id="levyTypesBody"></tbody>
- </table>
- </div>
- </div>
- </div>
- </div>
-
-</main>
+ </main>
  </div>
 </div>
 
@@ -2354,7 +2323,148 @@
 </div>
 
 
- <!-- ADD/EDIT LEVY TYPE MODAL -->
+ <!-- LEVIES -->
+ <div class="page" id="page-levies" style="padding-top:0;">
+ <!-- Levies compact header -->
+ <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+  <div>
+   <div style="font-size:18px;font-weight:800;color:var(--text);">Levies &amp; Extra Charges</div>
+   <div style="font-size:12px;color:var(--text3);">Textbooks, Stationery, PTA, Uniform, Excursion &amp; more</div>
+  </div>
+  <div style="display:flex;gap:3px;background:var(--surface2);border-radius:10px;padding:4px;flex-wrap:wrap;">
+   <button id="levyTab_assign" onclick="switchLevyTab('assign')" style="padding:7px 16px;border:none;border-radius:7px;background:var(--accent);color:#fff;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Assign Levies</button>
+   <button id="levyTab_pay" onclick="switchLevyTab('pay')" style="padding:7px 16px;border:none;border-radius:7px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Record Payment</button>
+   <button id="levyTab_report" onclick="switchLevyTab('report')" style="padding:7px 16px;border:none;border-radius:7px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Levy Report</button>
+   <button id="levyTab_types" onclick="switchLevyTab('types')" style="padding:7px 16px;border:none;border-radius:7px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Manage Types</button>
+  </div>
+ </div>
+ <!-- ASSIGN LEVIES -->
+ <div id="levyPanel_assign">
+ <div class="card" style="margin-bottom:16px;">
+ <div class="card-header">
+ <div><div class="card-title"> Assign Levy to Students</div><div class="card-sub">Assign one levy to an individual student or an entire class at once</div></div>
+ </div>
+ <div class="form-grid" style="margin-top:12px;">
+ <div class="form-field">
+ <label>Levy Type *</label>
+ <select id="assignLevyType" onchange="updateAssignAmount()">
+ <option value="">— Select levy —</option>
+ </select>
+ </div>
+ <div class="form-field">
+ <label>Amount (GHS) *</label>
+ <input type="number" id="assignLevyAmount" min="0" step="0.01" placeholder="0.00">
+ </div>
+ <div class="form-field">
+ <label>Academic Year</label>
+ <input type="text" id="assignLevyYear" placeholder="e.g. 2024/2025">
+ <div style="font-size:11px;color:var(--text3);margin-top:4px;">Levies cover the full academic year — not per term</div>
+ </div>
+ </div>
+ <div style="margin-top:4px;border-top:1px solid var(--border);padding-top:14px;">
+ <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;">Assign To:</div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+ <div class="form-field" style="margin:0;min-width:180px;">
+ <label style="font-size:11px;">Assign to entire Class</label>
+ <select id="assignLevyClass">
+ <option value="">— Select class —</option>
+ </select>
+ </div>
+ <button class="btn btn-primary" onclick="assignLevyToClass()" style="height:40px;"> Assign to Class</button>
+ <span style="color:var(--text3);font-size:12px;align-self:center;">or</span>
+ <div class="form-field" style="margin:0;min-width:220px;">
+ <label style="font-size:11px;">Assign to specific Student</label>
+ <input type="text" id="assignLevyStudentSearch" placeholder="Search student..." oninput="levyStudentSearchFn()" autocomplete="off">
+ <div id="assignLevyStudentDrop" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;max-height:140px;overflow-y:auto;display:none;margin-top:4px;position:absolute;z-index:100;min-width:240px;"></div>
+ </div>
+ <div style="align-self:flex-end;">
+ <div style="font-size:11px;color:var(--text3);margin-bottom:4px;" id="assignLevyStudentName">No student selected</div>
+ <button class="btn btn-secondary" onclick="assignLevyToStudent()" style="height:36px;"> Assign to Student</button>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Assigned levies list -->
+ <div class="card">
+ <div class="card-header">
+ <div><div class="card-title"> All Assigned Levies</div><div class="card-sub" id="levyAssignedSub"></div></div>
+ <div style="display:flex;gap:8px;">
+ <select id="levyFilterClass" onchange="renderAssignedLevies()" style="padding:7px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:12px;">
+ <option value="">All Classes</option>
+ </select>
+ <select id="levyFilterType" onchange="renderAssignedLevies()" style="padding:7px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:12px;">
+ <option value="">All Types</option>
+ </select>
+ <select id="levyFilterStatus" onchange="renderAssignedLevies()" style="padding:7px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:12px;">
+ <option value="">All Status</option>
+ <option>Unpaid</option><option>Part Payment</option><option>Fully Paid</option>
+ </select>
+ </div>
+ </div>
+ <div class="table-wrap">
+ <table>
+ <thead><tr>
+ <th>Student</th><th>Class</th><th>Levy</th><th>Year</th>
+ <th>Amount</th><th>Paid</th><th>Balance</th><th>Status</th><th></th>
+ </tr></thead>
+ <tbody id="assignedLeviesBody"></tbody>
+ </table>
+ </div>
+ </div>
+ </div>
+
+ <!-- RECORD LEVY PAYMENT -->
+ <div id="levyPanel_pay" style="display:none;">
+ <div class="card">
+ <div class="card-header">
+ <div><div class="card-title"> Record Levy Payment</div><div class="card-sub">Pay off an assigned levy for a student</div></div>
+ </div>
+ <div class="form-grid" style="margin-top:12px;">
+ <div class="form-field full">
+ <label>Student *</label>
+ <input type="text" id="levyPayStudentSearch" placeholder="Type student name or ID..." oninput="levyPaySearchFn()" autocomplete="off">
+ <div id="levyPayStudentDrop" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;max-height:160px;overflow-y:auto;display:none;margin-top:4px;"></div>
+ </div>
+ <div class="form-field full" id="levyPayPickWrap" style="display:none;">
+ <label>Select Levy to Pay *</label>
+ <div id="levyPayPickList" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+ </div>
+ <div class="form-field"><label>Amount (GHS) *</label><input type="number" id="levyPayAmount" min="0" step="0.01" placeholder="0.00"></div>
+ <div class="form-field"><label>Date</label><input type="date" id="levyPayDate"></div>
+ <div class="form-field"><label>Payment Mode</label><select id="levyPayMode"><option>Cash</option><option>Mobile Money (MoMo)</option><option>Bank Transfer</option><option>Cheque</option></select></div>
+ <div class="form-field"><label>Cashier <span style="font-size:10px;color:var(--green);"></span></label><input type="text" id="levyPayCashier" readonly style="background:var(--surface3);color:var(--text2);cursor:not-allowed;"></div>
+ <div class="form-field full"><label>Remarks</label><input type="text" id="levyPayRemarks" placeholder="Optional"></div>
+ </div>
+ <div style="margin-top:16px;text-align:right;">
+ <button class="btn btn-primary" onclick="saveLevyPayment()"> Record Levy Payment</button>
+ </div>
+ </div>
+ </div>
+
+ <!-- LEVY REPORT -->
+ <div id="levyPanel_report" style="display:none;">
+ <div id="levyReportContent"></div>
+ </div>
+
+ <!-- MANAGE LEVY TYPES -->
+ <div id="levyPanel_types" style="display:none;">
+ <div class="card">
+ <div class="card-header">
+ <div><div class="card-title"> Levy Types</div><div class="card-sub">Configure the types of levies your school charges</div></div>
+ <button class="btn btn-primary btn-sm" onclick="openAddLevyType()"> Add Type</button>
+ </div>
+ <div class="table-wrap" style="margin-top:12px;">
+ <table>
+ <thead><tr><th>#</th><th>Icon</th><th>Name</th><th>Default Amount</th><th>Note</th><th>Actions</th></tr></thead>
+ <tbody id="levyTypesBody"></tbody>
+ </table>
+ </div>
+ </div>
+ </div>
+ </div>
+
+<!-- ADD/EDIT LEVY TYPE MODAL -->
 <div class="modal-overlay" id="levyTypeModal">
  <div class="modal" style="width:460px;">
  <div class="modal-header">
@@ -3189,6 +3299,7 @@ function showPage(p){
  if(p==='parentportal') initParentPortal();
  if(p==='help') renderHelpManual();
  if(p==='monthlyreport') renderMonthlyReport();
+ if(p==='smsblast') initSmsBlastPage();
 }
 
 // ===================== DASHBOARD =====================
@@ -8238,6 +8349,146 @@ async function exportResultsExcel(){
   var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Results');
   XLSX.writeFile(wb,(SETTINGS.schoolName||'School').replace(/[^a-zA-Z0-9]/g,'_')+'_Results.xlsx');
   toast('Results exported','success');
+}
+
+// ═══════════════════════════════════════
+// SMS BLAST MODULE
+// ═══════════════════════════════════════
+function initSmsBlastPage(){
+  // Populate class dropdown
+  var cls = document.getElementById('smsBlastClass');
+  if(cls){
+    cls.innerHTML = '<option value="">All Classes</option>' + CLASSES.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
+  }
+  // Set current term
+  var termSel = document.getElementById('smsBlastTerm');
+  if(termSel && SETTINGS.currentTerm) termSel.value = SETTINGS.currentTerm;
+  // Update API status
+  var statusEl = document.getElementById('smsApiStatus');
+  if(statusEl){
+    statusEl.textContent = SETTINGS.mnotifyKey ? 'Mnotify Ready' : 'API Key Not Set';
+    statusEl.style.background = SETTINGS.mnotifyKey ? 'rgba(5,150,105,0.1)' : 'rgba(220,38,38,0.1)';
+    statusEl.style.color = SETTINGS.mnotifyKey ? 'var(--green)' : 'var(--red)';
+  }
+  // Stats
+  var withContact = STUDENTS.filter(function(s){return !s.withdrawn && s.contact;}).length;
+  var noContact = STUDENTS.filter(function(s){return !s.withdrawn && !s.contact;}).length;
+  var outstanding = STUDENTS.filter(function(s){
+    if(s.withdrawn) return false;
+    var c = calcStudent(s); return c.tb > 0 && s.contact;
+  }).length;
+  var el1 = document.getElementById('smsBlastTotalParents'); if(el1) el1.textContent = withContact;
+  var el2 = document.getElementById('smsBlastOutstanding'); if(el2) el2.textContent = outstanding;
+  var el3 = document.getElementById('smsBlastNoContact'); if(el3) el3.textContent = noContact;
+  // Load default template
+  loadSmsBlastTemplate();
+}
+
+function loadSmsBlastTemplate(){
+  var sel = document.getElementById('smsBlastTemplateSelect');
+  var ta = document.getElementById('smsBlastMessage');
+  if(!sel || !ta) return;
+  if(sel.value === 'reminder'){
+    ta.value = SETTINGS.smsTemplateReminder || 'Dear {parent}, your ward {name} ({class}) has an outstanding fee balance of {balance} for {term}. Kindly settle at your earliest convenience. — {school}';
+  } else {
+    ta.value = '';
+    ta.focus();
+  }
+  updateSmsBlastPreview();
+}
+
+function getSmsBlastRecipients(){
+  var term = (document.getElementById('smsBlastTerm')||{value:'Term 1'}).value;
+  var cls = (document.getElementById('smsBlastClass')||{value:''}).value;
+  var target = document.querySelector('input[name="smsBlastTarget"]:checked');
+  var targetVal = target ? target.value : 'outstanding';
+  var fKey = {'Term 1':'t1f','Term 2':'t2f','Term 3':'t3f'}[term];
+  var pKey = {'Term 1':'t1p','Term 2':'t2p','Term 3':'t3p'}[term];
+  var students = STUDENTS.filter(function(s){
+    if(s.withdrawn || !s.contact) return false;
+    if(cls && s.class_ !== cls) return false;
+    if(targetVal === 'outstanding'){
+      var bal = (s[fKey]||0) - (s[pKey]||0);
+      return bal > 0;
+    }
+    return true;
+  });
+  return students.map(function(s){
+    var bal = (s[fKey]||0) - (s[pKey]||0);
+    return { student: s, balance: bal, term: term };
+  });
+}
+
+function updateSmsBlastPreview(){
+  var recipients = getSmsBlastRecipients();
+  var msg = (document.getElementById('smsBlastMessage')||{value:''}).value;
+  var countEl = document.getElementById('smsBlastCount');
+  var listEl = document.getElementById('smsBlastPreviewList');
+  var charEl = document.getElementById('smsBlastCharCount');
+  if(countEl) countEl.textContent = recipients.length + ' recipient' + (recipients.length !== 1 ? 's' : '');
+  if(charEl) charEl.textContent = msg.length + ' characters · ~' + Math.ceil(msg.length/160) + ' SMS credit' + (Math.ceil(msg.length/160) !== 1 ? 's' : '') + ' per message';
+  if(!listEl) return;
+  if(!recipients.length){
+    listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);">No recipients match current filters.</div>';
+    return;
+  }
+  listEl.innerHTML = recipients.map(function(r){
+    var preview = buildSMSMessage(msg, {
+      parent: r.student.parent || 'Parent',
+      name: r.student.name,
+      class_: r.student.class_,
+      balance: ghs(r.balance),
+      term: r.term,
+      year: SETTINGS.academicYear || '',
+      school: SETTINGS.schoolName || '',
+      phone: SETTINGS.phone || ''
+    });
+    return '<div style="padding:12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:4px;">'
+      +'<div>'
+      +'<span style="font-weight:700;font-size:13px;">'+r.student.name+'</span>'
+      +'<span style="font-size:11px;color:var(--text3);margin-left:8px;">'+r.student.class_+'</span>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;">'
+      +(r.balance > 0 ? '<span style="font-size:11px;font-weight:700;color:var(--red);font-family:Outfit,sans-serif;">'+ghs(r.balance)+'</span>' : '')
+      +'<span style="font-size:11px;color:var(--text3);">'+r.student.contact+'</span>'
+      +'</div></div>'
+      +'<div style="background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:8px 10px;font-size:12px;color:var(--text2);line-height:1.5;">'+preview+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+async function sendSmsBlast(){
+  var recipients = getSmsBlastRecipients();
+  var msg = (document.getElementById('smsBlastMessage')||{value:''}).value.trim();
+  if(!msg){ toast('Please enter a message', 'error'); return; }
+  if(!SETTINGS.mnotifyKey){ toast('Mnotify API key not set. Go to Settings → SMS Notifications to add it.', 'error'); return; }
+  if(!recipients.length){ toast('No recipients to send to', 'error'); return; }
+  if(!confirm('Send SMS to ' + recipients.length + ' parent' + (recipients.length !== 1 ? 's' : '') + ' via Mnotify?')) return;
+  var btn = document.getElementById('smsBlastSendBtn');
+  if(btn){ btn.textContent = 'Sending...'; btn.disabled = true; }
+  var sent = 0, failed = 0;
+  for(var i = 0; i < recipients.length; i++){
+    var r = recipients[i];
+    var smsMsg = buildSMSMessage(msg, {
+      parent: r.student.parent || 'Parent',
+      name: r.student.name,
+      class_: r.student.class_,
+      balance: ghs(r.balance),
+      term: r.term,
+      year: SETTINGS.academicYear || '',
+      school: SETTINGS.schoolName || '',
+      phone: SETTINGS.phone || ''
+    });
+    var ok = await mnotifySend(r.student.contact, smsMsg);
+    if(ok) sent++; else failed++;
+    // Update button progress
+    if(btn) btn.textContent = 'Sending ' + (i+1) + ' of ' + recipients.length + '...';
+  }
+  if(btn){ btn.textContent = 'Send SMS to All Recipients'; btn.disabled = false; }
+  AUDIT_LOG.push({time:new Date().toISOString(), user:currentAdminName, action:'SMS_BLAST', detail:'SMS Blast — '+sent+' sent, '+failed+' failed to '+recipients.length+' parents'});
+  saveAuditLog();
+  toast(sent + ' SMS sent' + (failed ? ' · ' + failed + ' failed' : '') + ' via Mnotify', sent > 0 ? 'success' : 'error');
 }
 
 // PWA — Service Worker + Install Prompt
