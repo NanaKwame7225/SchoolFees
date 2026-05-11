@@ -3167,7 +3167,11 @@ function showPage(p){
  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
  document.getElementById('page-'+p).classList.add('active');
- event.currentTarget.classList.add('active');
+ if(event && event.currentTarget) event.currentTarget.classList.add('active');
+ // Scroll content area back to top when switching pages
+ var contentEl = document.querySelector('.content');
+ if(contentEl) contentEl.scrollTop = 0;
+ window.scrollTo(0,0);
  if(p==='dashboard') renderDashboard();
  if(p==='reports') renderReports();
  if(p==='search') advSearch();
