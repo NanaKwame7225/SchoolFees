@@ -2506,7 +2506,71 @@
  </div>
 </div>
 
+<!-- BULK PAYMENT MODAL -->
+<div class="modal-overlay" id="bulkPaymentModal" style="display:none;">
+ <div class="modal" style="max-width:700px;width:96%;">
+ <div class="modal-header">
+ <h3 class="modal-title"> Bulk Payment Recording</h3>
+ <button class="modal-close" onclick="closeModal('bulkPaymentModal')"></button>
+ </div>
+ <div class="modal-body">
+ <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+ <div class="form-field">
+ <label>Term</label>
+ <select id="bulkPayTerm">
+ <option>Term 1</option><option>Term 2</option><option>Term 3</option>
+ </select>
+ </div>
+ <div class="form-field">
+ <label>Filter by Class</label>
+ <select id="bulkPayClass" onchange="loadBulkPayStudents()">
+ <option value="">— All Classes —</option>
+ </select>
+ </div>
+ <div class="form-field">
+ <label>Payment Mode</label>
+ <select id="bulkPayMode">
+ <option>Cash</option><option>Mobile Money (MoMo)</option><option>Bank Transfer</option><option>Cheque</option>
+ </select>
+ </div>
+ </div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+ <div class="form-field">
+ <label>Payment Date</label>
+ <input type="date" id="bulkPayDate">
+ </div>
+ <div class="form-field">
+ <label>Default Amount (GHS) — applies to all</label>
+ <input type="number" id="bulkPayDefaultAmount" min="0" step="0.01" placeholder="Leave blank to use each student's balance" oninput="applyBulkDefaultAmount()">
+ </div>
+ </div>
+ <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Enter amount for each student below. Leave blank to skip.</div>
+ <div style="overflow-x:auto;max-height:340px;overflow-y:auto;">
+ <table style="width:100%;border-collapse:collapse;font-size:12px;" id="bulkPayTable">
+ <thead style="position:sticky;top:0;background:var(--surface2);z-index:1;">
+ <tr>
+ <th style="padding:8px 10px;text-align:left;color:var(--text3);font-size:11px;">Student</th>
+ <th style="padding:8px 10px;text-align:left;color:var(--text3);font-size:11px;">Class</th>
+ <th style="padding:8px 10px;text-align:right;color:var(--text3);font-size:11px;">Billed</th>
+ <th style="padding:8px 10px;text-align:right;color:var(--text3);font-size:11px;">Paid</th>
+ <th style="padding:8px 10px;text-align:right;color:var(--text3);font-size:11px;">Balance</th>
+ <th style="padding:8px 10px;text-align:right;color:var(--text3);font-size:11px;">Amount to Record</th>
+ </tr>
+ </thead>
+ <tbody id="bulkPayTableBody"></tbody>
+ </table>
+ </div>
+ <div id="bulkPaySummary" style="margin-top:12px;font-size:13px;color:var(--text2);"></div>
+ </div>
+ <div class="modal-footer">
+ <button class="btn btn-secondary" onclick="closeModal('bulkPaymentModal')">Cancel</button>
+ <button class="btn btn-primary" onclick="saveBulkPayments()"> Record All Payments</button>
+ </div>
+ </div>
+</div>
+
 <script>
+
 // ===================== API CONFIG =====================
 // Multi-tenant platform
 const NEW_API_BASE = 'https://schoolmanagement-gh-production.up.railway.app/api';
@@ -8672,70 +8736,6 @@ if(isIOS && !isStandalone){
  }, 3000);
 }
 
-</script>
-
-<!-- BULK PAYMENT MODAL -->
-<div class="modal-overlay" id="bulkPaymentModal" style="display:none;">
- <div class="modal" style="max-width:700px;width:96%;">
- <div class="modal-header">
- <h3 class="modal-title"> Bulk Payment Recording</h3>
- <button class="modal-close" onclick="closeModal('bulkPaymentModal')"></button>
- </div>
- <div class="modal-body">
- <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
- <div class="form-field">
- <label>Term</label>
- <select id="bulkPayTerm">
- <option>Term 1</option><option>Term 2</option><option>Term 3</option>
- </select>
- </div>
- <div class="form-field">
- <label>Filter by Class</label>
- <select id="bulkPayClass" onchange="loadBulkPayStudents()">
- <option value="">— All Classes —</option>
- </select>
- </div>
- <div class="form-field">
- <label>Payment Mode</label>
- <select id="bulkPayMode">
- <option>Cash</option><option>Mobile Money (MoMo)</option><option>Bank Transfer</option><option>Cheque</option>
- </select>
- </div>
- </div>
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
- <div class="form-field">
- <label>Payment Date</label>
- <input type="date" id="bulkPayDate">
- </div>
- <div class="form-field">
- <label>Default Amount (GHS) — applies to all</label>
- <input type="number" id="bulkPayDefaultAmount" min="0" step="0.01" placeholder="Leave blank to use each student's balance" oninput="applyBulkDefaultAmount()">
- </div>
- </div>
- <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Enter amount for each student below. Leave blank to skip.</div>
- <div style="overflow-x:auto;max-height:340px;overflow-y:auto;">
- <table style="width:100%;border-collapse:collapse;font-size:12px;" id="bulkPayTable">
- <thead style="position:sticky;top:0;background:var(--surface2);z-index:1;">
- <tr>
- <th style="padding:8px 10px;text-align:left;color:var(--text3);font-size:11px;">Student</th>
- <th style="padding:8px 10px;text-align:left;color:var(--text3);font-size:11px;">Class</th>
- <th style="padding:8px 10px;text-align:right;color:var(--text3);font-size:11px;">Billed</th>
- <th style="padding:8px 10px;text-align:right;color:var(--text3);font-size:11px;">Paid</th>
- <th style="padding:8px 10px;text-align:right;color:var(--text3);font-size:11px;">Balance</th>
- <th style="padding:8px 10px;text-align:right;color:var(--text3);font-size:11px;">Amount to Record</th>
- </tr>
- </thead>
- <tbody id="bulkPayTableBody"></tbody>
- </table>
- </div>
- <div id="bulkPaySummary" style="margin-top:12px;font-size:13px;color:var(--text2);"></div>
- </div>
- <div class="modal-footer">
- <button class="btn btn-secondary" onclick="closeModal('bulkPaymentModal')">Cancel</button>
- <button class="btn btn-primary" onclick="saveBulkPayments()"> Record All Payments</button>
- </div>
- </div>
-</div>
 
 
 // ══════════════════════════════════════════════════════════════
@@ -9023,6 +9023,7 @@ function initiateYearRollover(){
   AUDIT_LOG.push({time:new Date().toISOString(),user:currentAdminName,action:'YEAR_ROLLOVER',detail:'Rolled over to academic year '+newYear});
   saveAuditLog();
 }
+
 
 </script>
 </body>
