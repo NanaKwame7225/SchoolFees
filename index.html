@@ -5653,18 +5653,18 @@ async function downloadBulkTemplate(){
  var wb = XLSX.utils.book_new();
 
  // ── Sheet 1: Student Data (main import sheet) ──────
- var headers = ['Name','Class','Gender','DOB (YYYY-MM-DD)','Parent/Guardian','Contact','T1 Fee','T2 Fee','T3 Fee'];
+ var headers = ['Name','Class','Gender','Parent/Guardian','Contact'];
  var sampleRows = [
-  ['Kofi Mensah','Primary 1','Male','2015-03-10','Mr. Mensah','0244123456','','',''],
-  ['Ama Boateng','KG 2','Female','2017-06-22','Mrs. Boateng','0203456789','','',''],
-  ['Emmanuel Darko','JHS 1','Male','2012-11-04','Mr. Darko','0271234567','','',''],
+  ['Kofi Mensah','Primary 1','Male','Mr. Mensah','0244123456'],
+  ['Ama Boateng','KG 2','Female','Mrs. Boateng','0203456789'],
+  ['Emmanuel Darko','JHS 1','Male','Mr. Darko','0271234567'],
  ];
  var wsData = [headers].concat(sampleRows);
  var ws = XLSX.utils.aoa_to_sheet(wsData);
 
  // Column widths
  ws['!cols'] = [
-  {wch:22},{wch:14},{wch:10},{wch:16},{wch:22},{wch:14},{wch:8},{wch:8},{wch:8}
+  {wch:26},{wch:14},{wch:10},{wch:24},{wch:16}
  ];
 
  // ── Data validation: Class column (B) dropdown ──────
@@ -6057,10 +6057,10 @@ function bulkGetFeeDefaults(cls){
 }
 
 function bulkAddRow(){
- const cls = (document.getElementById('bulkClass')||{}).value || CLASSES[0];
- const fees = bulkGetFeeDefaults(cls);
+ var cls = (document.getElementById('bulkClass')||{value:CLASSES[0]}).value || CLASSES[0];
+ var fees = bulkGetFeeDefaults(cls);
  bulkRowCounter++;
- bulkRows.push({rowId:bulkRowCounter, name:'', class_:cls, gender:'Male', dob:'', parent:'', contact:'', t1f:fees.t1, t2f:fees.t2, t3f:fees.t3});
+ bulkRows.push({id:bulkRowCounter, name:'', class_:cls, gender:'Male', dob:'', parent:'', contact:'', t1f:fees.t1, t2f:fees.t2, t3f:fees.t3});
  renderBulkTable();
 }
 
@@ -6084,54 +6084,46 @@ function bulkRemoveRow(rowId){
 }
 
 function bulkReadRow(rowId){
- const r = bulkRows.find(x=>x.rowId===rowId);
+ var r = bulkRows.find(function(x){ return x.id===rowId; });
  if(!r) return;
- r.name = (document.getElementById(`br_name_${rowId}`)||{}).value||'';
- r.class_ = (document.getElementById(`br_cls_${rowId}`)||{}).value||CLASSES[0];
- r.gender = (document.getElementById(`br_gen_${rowId}`)||{}).value||'Male';
- r.dob = (document.getElementById(`br_dob_${rowId}`)||{}).value||'';
- r.parent = (document.getElementById(`br_par_${rowId}`)||{}).value||'';
- r.contact = (document.getElementById(`br_con_${rowId}`)||{}).value||'';
- r.t1f = parseFloat((document.getElementById(`br_t1_${rowId}`)||{}).value)||0;
- r.t2f = parseFloat((document.getElementById(`br_t2_${rowId}`)||{}).value)||0;
- r.t3f = parseFloat((document.getElementById(`br_t3_${rowId}`)||{}).value)||0;
+ function gv(id){ var el=document.getElementById(id); return el?el.value:''; }
+ r.name    = gv('br_name_'+rowId).trim();
+ r.class_  = gv('br_cls_'+rowId) || CLASSES[0];
+ r.gender  = gv('br_gen_'+rowId) || 'Male';
+ r.dob     = gv('br_dob_'+rowId);
+ r.parent  = gv('br_par_'+rowId).trim();
+ r.contact = gv('br_con_'+rowId).trim();
  updateBulkCount();
 }
 
 function updateBulkCount(){
- // read all rows first
- bulkRows.forEach(function(r){bulkReadRow(r.id);});
- const valid = bulkRows.filter(r=>r.name.trim()).length;
- const el = document.getElementById('bulkRowCount');
- if(el) el.textContent = `${valid} of ${bulkRows.length} rows have names and will be saved`;
- el.style.color = valid>0?'var(--green)':'var(--text3)';
+ var valid = bulkRows.filter(function(r){ return r.name && r.name.trim(); }).length;
+ var el = document.getElementById('bulkRowCount');
+ if(el){
+  el.textContent = valid + ' of ' + bulkRows.length + ' rows have names and will be saved';
+  el.style.color = valid>0 ? 'var(--green)' : 'var(--text3)';
+ }
 }
 
 function renderBulkTable(){
  var tbody = document.getElementById('bulkTableBody');
  if(!tbody) return;
- // Build HTML in chunks to avoid call stack overflow on mobile
- var clsOptions = CLASSES.map(function(c){ return '<option>'+c+'</option>'; }).join('');
  var chunks = [];
  for(var i=0;i<bulkRows.length;i++){
   var r = bulkRows[i];
-  // Build class select with selected option
   var clsSel = CLASSES.map(function(c){
    return '<option'+(c===r.class_?' selected':'')+'>'+c+'</option>';
   }).join('');
+  var safeRid = r.id;
   chunks.push(
    '<tr style="border-top:1px solid var(--border);">'
    +'<td style="padding:6px 8px;color:var(--text3);font-size:11px;">'+(i+1)+'</td>'
-   +'<td style="padding:4px 6px;"><input id="br_name_'+r.id+'" value="'+r.name.replace(/"/g,'&quot;')+'" placeholder="Full name" oninput="bulkReadRow('+r.id+')" style="width:130px;padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
-   +'<td style="padding:4px 6px;"><select id="br_cls_'+r.id+'" onchange="bulkReadRow('+r.id+')" style="padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;">'+clsSel+'</select></td>'
-   +'<td style="padding:4px 6px;"><select id="br_gen_'+r.id+'" onchange="bulkReadRow('+r.id+')" style="padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"><option'+(r.gender==='Male'?' selected':'')+'>Male</option><option'+(r.gender==='Female'?' selected':'')+'>Female</option></select></td>'
-   +'<td style="padding:4px 6px;"><input type="date" id="br_dob_'+r.id+'" value="'+r.dob+'" oninput="bulkReadRow('+r.id+')" style="padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
-   +'<td style="padding:4px 6px;"><input id="br_par_'+r.id+'" value="'+r.parent.replace(/"/g,'&quot;')+'" placeholder="Parent" oninput="bulkReadRow('+r.id+')" style="width:110px;padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
-   +'<td style="padding:4px 6px;"><input id="br_con_'+r.id+'" value="'+r.contact+'" placeholder="0XX..." oninput="bulkReadRow('+r.id+')" style="width:100px;padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
-   +'<td style="padding:4px 6px;"><input type="number" id="br_t1_'+r.id+'" value="'+r.t1f+'" oninput="bulkReadRow('+r.id+')" style="width:68px;padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
-   +'<td style="padding:4px 6px;"><input type="number" id="br_t2_'+r.id+'" value="'+r.t2f+'" oninput="bulkReadRow('+r.id+')" style="width:68px;padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
-   +'<td style="padding:4px 6px;"><input type="number" id="br_t3_'+r.id+'" value="'+r.t3f+'" oninput="bulkReadRow('+r.id+')" style="width:68px;padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
-   +'<td style="padding:4px 6px;"><button onclick="bulkRemoveRow('+r.id+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:4px;"></button></td>'
+   +'<td style="padding:4px 6px;"><input id="br_name_'+safeRid+'" value="'+r.name.replace(/"/g,'&quot;')+'" placeholder="Full name *" oninput="bulkReadRow('+safeRid+')" style="width:150px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;"></td>'
+   +'<td style="padding:4px 6px;"><select id="br_cls_'+safeRid+'" onchange="bulkReadRow('+safeRid+')" style="padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;">'+clsSel+'</select></td>'
+   +'<td style="padding:4px 6px;"><select id="br_gen_'+safeRid+'" onchange="bulkReadRow('+safeRid+')" style="padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"><option'+(r.gender==='Male'?' selected':'')+'>Male</option><option'+(r.gender==='Female'?' selected':'')+'>Female</option></select></td>'
+   +'<td style="padding:4px 6px;"><input id="br_par_'+safeRid+'" value="'+r.parent.replace(/"/g,'&quot;')+'" placeholder="Parent/Guardian" oninput="bulkReadRow('+safeRid+')" style="width:130px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
+   +'<td style="padding:4px 6px;"><input id="br_con_'+safeRid+'" value="'+r.contact+'" placeholder="0XXXXXXXXX" oninput="bulkReadRow('+safeRid+')" style="width:115px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
+   +'<td style="padding:4px 6px;"><button onclick="bulkRemoveRow('+safeRid+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px;" title="Remove row">&times;</button></td>'
    +'</tr>'
   );
  }
@@ -6140,29 +6132,33 @@ function renderBulkTable(){
 }
 
 function saveBulkStudents(){
- // Flush all inputs
- bulkRows.forEach(function(r){bulkReadRow(r.id);});
- const valid = bulkRows.filter(r=>r.name.trim());
- if(!valid.length){toast('Please enter at least one student name','error');return;}
+ // Flush all current input values into bulkRows
+ bulkRows.forEach(function(r){ bulkReadRow(r.id); });
+ var valid = bulkRows.filter(function(r){ return r.name && r.name.trim(); });
+ if(!valid.length){ toast('Please enter at least one student name','error'); return; }
 
- // Duplicate name check within batch
- const names = valid.map(r=>r.name.trim().toLowerCase());
- const dupes = names.filter((n,i)=>names.indexOf(n)!==i);
+ // Duplicate check
+ var names = valid.map(function(r){ return r.name.trim().toLowerCase(); });
+ var dupes = names.filter(function(n,i){ return names.indexOf(n)!==i; });
  if(dupes.length){
- if(!confirm(`Possible duplicate names detected: ${[...new Set(dupes)].join(', ')}. Continue anyway?`)) return;
+  var uniq = dupes.filter(function(v,i,a){ return a.indexOf(v)===i; });
+  if(!confirm('Possible duplicate names: '+uniq.join(', ')+'. Continue anyway?')) return;
  }
 
- let added=0;
- valid.forEach(r=>{
- const id = nextId();
- STUDENTS.push({
- id, name:r.name.trim(), class_:r.class_, gender:r.gender,
- dob:r.dob, parent:r.parent, contact:r.contact, paymode:'Cash',
- t1f:r.t1f, t1p:0, t2f:r.t2f, t2p:0, t3f:r.t3f, t3p:0,
- photo:'', registered:today()
- });
- AUDIT_LOG.push({time:new Date().toISOString(), user:currentAdminName, action:'BULK_ADMIT', detail:`Added student ${id} — ${r.name.trim()} to ${r.class_}`});
- added++;
+ var added = 0;
+ valid.forEach(function(r){
+  // Auto-fill fees from class rates
+  var rates = (SETTINGS.classFeeRates && SETTINGS.classFeeRates[r.class_]) || {t1:0,t2:0,t3:0};
+  var sid = nextId();
+  STUDENTS.push({
+   id:sid, name:r.name.trim(), class_:r.class_, gender:r.gender||'Male',
+   dob:r.dob||'', parent:r.parent||'', contact:r.contact||'', paymode:'Cash',
+   t1f:rates.t1||0, t1p:0, t2f:rates.t2||0, t2p:0, t3f:rates.t3||0, t3p:0,
+   photo:'', registered:today()
+  });
+  AUDIT_LOG.push({time:new Date().toISOString(), user:currentAdminName, action:'BULK_ADMIT',
+   detail:'Added '+sid+' — '+r.name.trim()+' to '+r.class_});
+  added++;
  });
 
  bulkRows=[]; bulkRowCounter=0;
@@ -6171,8 +6167,9 @@ function saveBulkStudents(){
  renderStudents();
  renderDashboard();
  buildExportClassGrid();
- document.getElementById('studentBadge').textContent=STUDENTS.length;
- toast(` ${added} student${added!==1?'s':''} added successfully`,'success');
+ var badge = document.getElementById('studentBadge');
+ if(badge) badge.textContent = STUDENTS.length;
+ toast(added+' student'+(added!==1?'s':'')+' added successfully','success');
 }
 
 // openAddStudent tab reset is handled inline
