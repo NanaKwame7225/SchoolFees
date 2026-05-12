@@ -188,7 +188,7 @@
  /* CONTENT */
  .content { flex:1; padding:0 20px 20px 20px; overflow-y:auto; }
  .page.active { padding-top:14px; }
- #page-levies.active { padding-top:0 !important; }
+ #page-levies.active { padding-top:14px; }
 
  /* PAGE TITLES */
  .page-header { margin-bottom:8px; }
@@ -2335,7 +2335,7 @@
 
 
  <!-- LEVIES -->
- <div class="page" id="page-levies">
+ <div class="page" id="page-levies" style="padding:14px 0 0 0;">
   <div class="page-header" style="margin:0 0 12px 0;padding:0;">
    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
     <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
@@ -3418,14 +3418,14 @@ function showPage(p){
  window.scrollTo(0,0);
  var contentEl = document.querySelector('.content');
  if(contentEl) contentEl.scrollTop = 0;
- // Extra nudge for levies — use requestAnimationFrame so DOM has fully painted
- if(p==='levies'){
+ // Force scroll to top after page renders — double rAF ensures two paint cycles
+ requestAnimationFrame(function(){
   requestAnimationFrame(function(){
    var ce = document.querySelector('.content');
    if(ce) ce.scrollTop = 0;
    window.scrollTo(0,0);
   });
- }
+ });
 }
 
 // ===================== DASHBOARD =====================
