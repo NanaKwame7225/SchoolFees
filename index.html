@@ -3394,10 +3394,6 @@ function showPage(p){
  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
  document.getElementById('page-'+p).classList.add('active');
  if(event && event.currentTarget) event.currentTarget.classList.add('active');
- // Scroll content area back to top when switching pages
- var contentEl = document.querySelector('.content');
- if(contentEl){ contentEl.scrollTop = 0; }
- window.scrollTo(0,0);
 
  if(p==='dashboard') renderDashboard();
  if(p==='reports') renderReports();
@@ -3417,6 +3413,19 @@ function showPage(p){
  if(p==='help') renderHelpManual();
  if(p==='monthlyreport') renderMonthlyReport();
  if(p==='smsblast') initSmsBlastPage();
+
+ // Scroll AFTER page content has rendered
+ window.scrollTo(0,0);
+ var contentEl = document.querySelector('.content');
+ if(contentEl) contentEl.scrollTop = 0;
+ // Extra nudge for levies — use requestAnimationFrame so DOM has fully painted
+ if(p==='levies'){
+  requestAnimationFrame(function(){
+   var ce = document.querySelector('.content');
+   if(ce) ce.scrollTop = 0;
+   window.scrollTo(0,0);
+  });
+ }
 }
 
 // ===================== DASHBOARD =====================
