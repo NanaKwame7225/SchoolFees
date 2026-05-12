@@ -186,8 +186,9 @@
  .nav-item .badge { margin-left:auto; background:var(--accent); color:#fff; border-radius:10px; padding:2px 8px; font-size:10px; font-weight:700; }
 
  /* CONTENT */
- .content { flex:1; padding:14px 20px 20px 20px; overflow-y:auto; }
- .page.active { padding-top:0; }
+ .content { flex:1; padding:0 20px 20px 20px; overflow-y:auto; }
+ .page.active { padding-top:14px; }
+ #page-levies.active { padding-top:0 !important; }
 
  /* PAGE TITLES */
  .page-header { margin-bottom:8px; }
@@ -396,13 +397,9 @@
  /* Page */
  .page { display:none; }
  .page.active { display:block; animation:fadeUp 0.3s ease; }
- #page-levies.active { animation:none !important; }
  /* Remove content top padding when levies page is active */
- .content:has(#page-levies.active) { padding-top:0 !important; }
 
  /* Pull levies content up to eliminate dead space at top */
- .content:has(#page-levies.active) { padding-top:0 !important; }
- #page-levies .page-header { margin-top:0 !important; padding-top:0 !important; }
 </style>
 </head>
 <body>
@@ -1854,7 +1851,7 @@
 
  <!-- HIDDEN elements needed by other parts of the app -->
  <div style="display:none;">
- <div id="logoPreviewWrap"><img id="logoPreviewImg" src="" alt="" style="display:none;"><span id="logoPreviewPlaceholder"></span></div>
+ <div id="logoPreviewWrap" style="width:0;height:0;overflow:hidden;position:absolute;"><img id="logoPreviewImg" src="" alt="" style="display:none;width:0;height:0;max-width:0;max-height:0;"><span id="logoPreviewPlaceholder"></span></div>
  <input type="file" id="logoFileInput" accept="image/*" onchange="handleLogoUpload(event)">
  <button id="removeLogoBtnSettings" onclick="removeLogo()"></button>
  <div id="settingsForm"></div>
