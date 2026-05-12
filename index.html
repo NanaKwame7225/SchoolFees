@@ -397,6 +397,8 @@
  .page { display:none; }
  .page.active { display:block; animation:fadeUp 0.3s ease; }
  #page-levies.active { padding-top:0 !important; margin-top:0 !important; }
+ #page-levies.active > .page-header { margin-top:0 !important; padding-top:0 !important; }
+ .content:has(> #page-levies.active), .content:has(#page-levies.active) { padding-top:0 !important; }
  /* Pull levies content up to eliminate dead space at top */
  .content:has(#page-levies.active) { padding-top:0 !important; }
  #page-levies .page-header { margin-top:0 !important; padding-top:0 !important; }
@@ -2335,7 +2337,7 @@
 
 
  <!-- LEVIES -->
- <div class="page" id="page-levies" style="margin-top:-14px;">
+ <div class="page" id="page-levies" style="margin-top:-14px;padding-top:0 !important;">
   <div class="page-header" style="margin:0 0 12px 0;padding:0;">
    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
     <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
@@ -2358,11 +2360,15 @@
  <div><div class="card-title"> Assign Levy to Students</div><div class="card-sub">Assign one levy to an individual student or an entire class at once</div></div>
  </div>
  <div class="form-grid" style="margin-top:12px;">
- <div class="form-field">
- <label>Levy Type *</label>
- <select id="assignLevyType" onchange="updateAssignAmount()">
- <option value="">— Select levy —</option>
- </select>
+ <div class="form-field" style="grid-column:1/-1;">
+ <label>Levy Type(s) * <span style="font-size:10px;color:var(--text3);font-weight:400;">type to search or add multiple</span></label>
+ <div style="position:relative;">
+  <input type="text" id="assignLevyTypeInput" placeholder="e.g. PTA, Textbooks, Uniform..."
+   oninput="filterLevySuggestions()" onfocus="filterLevySuggestions()" autocomplete="off"
+   style="width:100%;padding:10px 12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+  <div id="levySuggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;z-index:200;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.3);margin-top:4px;"></div>
+ </div>
+ <div id="levyChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:10px;"></div>
  </div>
  <div class="form-field">
  <label>Amount (GHS) *</label>
@@ -6132,10 +6138,14 @@ function renderBulkTable(){
 }
 
 function saveBulkStudents(){
- // Flush all current input values into bulkRows
- bulkRows.forEach(function(r){ bulkReadRow(r.id); });
- var valid = bulkRows.filter(function(r){ return r.name && r.name.trim(); });
- if(!valid.length){ toast('Please enter at least one student name','error'); return; }
+ // Only read from DOM if the input element exists (manual rows)
+ // After file import, names already live in bulkRows memory — preserve them
+ bulkRows.forEach(function(r){
+  var el = document.getElementById('br_name_'+r.id);
+  if(el) bulkReadRow(r.id);
+ });
+ var valid = bulkRows.filter(function(r){ return r.name && r.name.trim().length > 0; });
+ if(!valid.length){ toast('No student names found. Type names in the rows or upload a file first.','error'); return; }
 
  // Duplicate check
  var names = valid.map(function(r){ return r.name.trim().toLowerCase(); });
@@ -6491,11 +6501,105 @@ let selectedLevyPayStudent = null;
 let selectedLevyToPayId = null;
 let editingLevyTypeId = null;
 
+// ── Levy multi-type chip system ─────────────────────────────
+var selectedLevyTypes = [];
+
+function filterLevySuggestions(){
+ var inp = document.getElementById('assignLevyTypeInput');
+ var box = document.getElementById('levySuggestions');
+ if(!inp||!box) return;
+ var val = inp.value.trim().toLowerCase();
+ var avail = LEVY_TYPES.filter(function(lt){
+  return !selectedLevyTypes.find(function(s){return s.id===lt.id;})
+   && (!val || lt.name.toLowerCase().indexOf(val)!==-1);
+ });
+ box.innerHTML = '';
+ avail.forEach(function(lt){
+  var d = document.createElement('div');
+  d.style.cssText = 'padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;';
+  d.textContent = lt.name;
+  if(lt.defaultAmount){
+   var sp = document.createElement('span');
+   sp.style.cssText = 'font-size:11px;color:var(--text3);';
+   sp.textContent = 'GHS '+lt.defaultAmount;
+   d.appendChild(sp);
+  }
+  (function(lid,ln,la){
+   d.addEventListener('mousedown',function(e){e.preventDefault();addLevyChip(lid,ln,la);});
+  })(lt.id, lt.name, parseFloat(lt.defaultAmount)||0);
+  d.addEventListener('mouseover',function(){this.style.background='var(--surface2)';});
+  d.addEventListener('mouseout', function(){this.style.background='';});
+  box.appendChild(d);
+ });
+ if(val && !LEVY_TYPES.find(function(lt){return lt.name.toLowerCase()===val;})){
+  var a = document.createElement('div');
+  a.style.cssText = 'padding:10px 14px;cursor:pointer;font-size:13px;color:var(--accent);border-top:1px solid var(--border);';
+  a.textContent = '+ Add "'+inp.value.trim()+'" as new levy type';
+  var rv = inp.value.trim();
+  a.addEventListener('mousedown',function(e){e.preventDefault();addLevyChipNew(rv);});
+  a.addEventListener('mouseover',function(){this.style.background='var(--surface2)';});
+  a.addEventListener('mouseout', function(){this.style.background='';});
+  box.appendChild(a);
+ }
+ box.style.display = box.children.length ? 'block' : 'none';
+}
+
+function addLevyChip(id, name, amount){
+ if(selectedLevyTypes.find(function(s){return s.id===id;})) return;
+ selectedLevyTypes.push({id:id, name:name, amount:amount});
+ renderLevyChips();
+ var inp=document.getElementById('assignLevyTypeInput');
+ if(inp){inp.value='';inp.focus();}
+ var box=document.getElementById('levySuggestions');
+ if(box) box.style.display='none';
+ var ae=document.getElementById('assignLevyAmount');
+ if(ae && !ae.dataset.manual && amount) ae.value=amount;
+}
+
+function addLevyChipNew(name){
+ selectedLevyTypes.push({id:'TMP_'+Date.now(), name:name, amount:0, isNew:true});
+ renderLevyChips();
+ var inp=document.getElementById('assignLevyTypeInput');
+ if(inp){inp.value='';inp.focus();}
+ var box=document.getElementById('levySuggestions');
+ if(box) box.style.display='none';
+}
+
+function removeLevyChip(cid){
+ selectedLevyTypes = selectedLevyTypes.filter(function(s){return s.id!==cid;});
+ renderLevyChips();
+}
+
+function renderLevyChips(){
+ var el = document.getElementById('levyChips');
+ if(!el) return;
+ var h = '';
+ selectedLevyTypes.forEach(function(s){
+  h += '<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.3);color:var(--accent);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;">'
+    + s.name
+    + '<button data-cid="'+s.id+'" class="lcrm" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:0;line-height:1;">&times;</button>'
+    + '</span>';
+ });
+ el.innerHTML = h;
+ el.querySelectorAll('.lcrm').forEach(function(b){
+  b.addEventListener('click',function(){removeLevyChip(this.dataset.cid);});
+ });
+}
+
+function getSelectedLevyTypes(){ return selectedLevyTypes; }
+
+document.addEventListener('click',function(e){
+ var box=document.getElementById('levySuggestions');
+ var inp=document.getElementById('assignLevyTypeInput');
+ if(box && inp && !inp.contains(e.target) && !box.contains(e.target))
+  box.style.display='none';
+});
+
 function initLeviesPage(){
- // Populate dropdowns
- const aLT = document.getElementById('assignLevyType');
- if(aLT) aLT.innerHTML = '<option value="">— Select levy —</option>' +
- LEVY_TYPES.map(lt=>`<option value="${lt.id}">${lt.icon} ${lt.name}</option>`).join('');
+ selectedLevyTypes = [];
+ renderLevyChips();
+ var inp = document.getElementById('assignLevyTypeInput');
+ if(inp) inp.value = '';
  
  const aLC = document.getElementById('assignLevyClass');
  if(aLC) aLC.innerHTML = '<option value="">— Select class —</option>' +
@@ -6574,38 +6678,46 @@ function selectAssignLevyStudent(id){
 
 // Assign to entire class 
 function assignLevyToClass(){
- const ltId = document.getElementById('assignLevyType').value;
- const amount = parseFloat(document.getElementById('assignLevyAmount').value)||0;
- const year = document.getElementById('assignLevyYear').value.trim() || SETTINGS.academicYear;
- const cls = document.getElementById('assignLevyClass').value;
- if(!ltId){toast('Select a levy type','error');return;}
+ var types = getSelectedLevyTypes();
+ var amount = parseFloat(document.getElementById('assignLevyAmount').value)||0;
+ var year = (document.getElementById('assignLevyYear').value||'').trim()||SETTINGS.academicYear;
+ var cls = document.getElementById('assignLevyClass').value;
+ if(!types.length){toast('Please select or type at least one levy type','error');return;}
  if(amount<=0){toast('Enter a valid amount','error');return;}
  if(!cls){toast('Select a class','error');return;}
- const lt = LEVY_TYPES.find(x=>x.id===ltId);
- const eligible = STUDENTS.filter(s=>s.class_===cls && !s.withdrawn);
- if(!eligible.length){toast('No active students in this class','error');return;}
- let added=0, skipped=0;
- eligible.forEach(s=>{
- const exists = STUDENT_LEVIES.find(l=>l.studentId===s.id && l.levyTypeId===ltId && l.academicYear===year);
- if(exists){skipped++;return;}
- STUDENT_LEVIES.push({
- id:'LEV'+Date.now()+''+Math.floor(Math.random()*9999),
- studentId:s.id, studentName:s.name, class_:s.class_,
- levyTypeId:ltId, levyName:lt.name, levyIcon:lt.icon,
- amount, term:'Annual', academicYear:year
+ var totalAdded=0, totalSkipped=0;
+ types.forEach(function(typeItem){
+  if(typeItem.isNew && !LEVY_TYPES.find(function(x){return x.name===typeItem.name;})){
+   LEVY_TYPES.push({id:'LV'+Date.now(), name:typeItem.name, icon:'', defaultAmount:amount, note:''});
+   saveLevyTypes();
+  }
+  var lt = LEVY_TYPES.find(function(x){return x.name===typeItem.name;})||typeItem;
+  var ltId = lt.id||typeItem.id;
+  var eligible = STUDENTS.filter(function(s){return s.class_===cls&&!s.withdrawn;});
+  if(!eligible.length) return;
+  var added=0, skipped=0;
+  eligible.forEach(function(s){
+   var exists = STUDENT_LEVIES.find(function(l){return l.studentId===s.id&&l.levyTypeId===ltId&&l.academicYear===year;});
+   if(exists){skipped++;return;}
+   STUDENT_LEVIES.push({
+    id:'LEV'+Date.now()+Math.floor(Math.random()*9999),
+    studentId:s.id, studentName:s.name, class_:s.class_,
+    levyTypeId:ltId, levyName:lt.name, levyIcon:lt.icon||'',
+    amount:amount, term:'Annual', academicYear:year
+   });
+   added++;
+  });
+  totalAdded+=added; totalSkipped+=skipped;
  });
- added++;
- });
- api('POST','/levies/assign-class',{class_:cls, levyTypeId:ltId, levyName:lt.name, levyIcon:lt.icon, amount, academicYear:year})
- .then(r=>{ added=r.added||added; skipped=r.skipped||skipped; return fetchAllFromAPI(); })
- .catch(()=>{ saveLevies(); })
- .finally(()=>{
+ saveLevies();
+ selectedLevyTypes=[];
+ renderLevyChips();
+ var inp=document.getElementById('assignLevyTypeInput');
+ if(inp) inp.value='';
  renderAssignedLevies(); updateLeviesBadge();
- toast(` ${lt.icon} ${lt.name} assigned to ${added} student${added!==1?'s':''} in ${cls} for ${year}${skipped?` · ${skipped} skipped`:''}`, 'success');
- });
+ toast(totalAdded+' levy record'+(totalAdded!==1?'s':'')+' created for '+types.length+' levy type'+(types.length!==1?'s':'')+(totalSkipped?' ('+totalSkipped+' already assigned)':''),'success');
 }
 
-// Assign to individual student 
 function assignLevyToStudent(){
  if(!selectedAssignLevyStudent){toast('Search and select a student first','error');return;}
  const ltId = document.getElementById('assignLevyType').value;
