@@ -448,7 +448,7 @@
 </div>
 
 <!-- PASSWORD GATE MODAL -->
-<div class="modal-overlay" id="passwordGateModal" style="backdrop-filter:blur(6px);">
+<div class="modal-overlay" id="passwordGateModal" style="backdrop-filter:blur(8px);z-index:9998;">
  <div style="background:var(--surface);border-radius:20px;width:360px;max-width:92vw;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.2);animation:fadeUp .3s ease;">
  <!-- Header bar -->
  <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:28px 28px 20px;text-align:center;">
@@ -5638,17 +5638,104 @@ let bulkRows = [];
 let bulkRowCounter = 0;
 
 // Download CSV template 
-function downloadBulkTemplate(){
- const header = 'Name,Class,Gender,DOB,Parent/Guardian,Contact,T1 Fee,T2 Fee,T3 Fee';
- const sample = [
- 'Kofi Mensah,Primary 1,Male,2015-03-10,Mr. Mensah,0244123456,550,550,550',
- 'Jane Doe,Primary 1,Female,2018-01-01,Mrs. Doe,0200000000,0,0,0',
- ].join('\n');
- const blob = new Blob([header+'\n'+sample], {type:'text/csv'});
- const a = document.createElement('a');
- a.href = URL.createObjectURL(blob);
- a.download = 'student_import_template.csv';
- a.click();
+async function downloadBulkTemplate(){
+ // Load SheetJS if needed
+ if(typeof XLSX === 'undefined'){
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+ }
+
+ var wb = XLSX.utils.book_new();
+
+ // ── Sheet 1: Student Data (main import sheet) ──────
+ var headers = ['Name','Class','Gender','DOB (YYYY-MM-DD)','Parent/Guardian','Contact','T1 Fee','T2 Fee','T3 Fee'];
+ var sampleRows = [
+  ['Kofi Mensah','Primary 1','Male','2015-03-10','Mr. Mensah','0244123456','','',''],
+  ['Ama Boateng','KG 2','Female','2017-06-22','Mrs. Boateng','0203456789','','',''],
+  ['Emmanuel Darko','JHS 1','Male','2012-11-04','Mr. Darko','0271234567','','',''],
+ ];
+ var wsData = [headers].concat(sampleRows);
+ var ws = XLSX.utils.aoa_to_sheet(wsData);
+
+ // Column widths
+ ws['!cols'] = [
+  {wch:22},{wch:14},{wch:10},{wch:16},{wch:22},{wch:14},{wch:8},{wch:8},{wch:8}
+ ];
+
+ // ── Data validation: Class column (B) dropdown ──────
+ // Write class list to a hidden Classes sheet
+ var classListData = [['Classes']].concat(CLASSES.map(function(c){return [c];}));
+ var wsClasses = XLSX.utils.aoa_to_sheet(classListData);
+ XLSX.utils.book_append_sheet(wb, wsClasses, 'Classes');
+
+ // Add data validation for column B (rows 2 to 502)
+ if(!ws['!dataValidations']) ws['!dataValidations'] = [];
+ ws['!dataValidations'].push({
+  sqref: 'B2:B502',
+  type: 'list',
+  formula1: 'Classes!$A$2:$A$'+(CLASSES.length+1),
+  showDropDown: false,
+  showErrorMessage: true,
+  errorTitle: 'Invalid Class',
+  error: 'Please select a class from the dropdown list.',
+  errorStyle: 'stop'
+ });
+
+ // Gender validation: column C
+ ws['!dataValidations'].push({
+  sqref: 'C2:C502',
+  type: 'list',
+  formula1: '"Male,Female"',
+  showDropDown: false,
+  showErrorMessage: true,
+  errorTitle: 'Invalid Gender',
+  error: 'Please select Male or Female.',
+  errorStyle: 'stop'
+ });
+
+ // Style header row
+ var headerStyle = {font:{bold:true},fill:{fgColor:{rgb:'1E3A5F'}},alignment:{horizontal:'center'}};
+ headers.forEach(function(h,i){
+  var cell = XLSX.utils.encode_cell({r:0,c:i});
+  if(ws[cell]) ws[cell].s = headerStyle;
+ });
+
+ XLSX.utils.book_append_sheet(wb, ws, 'Students');
+
+ // ── Sheet 2: Instructions ──────────────────────────
+ var instructions = [
+  ['SchoolManagement GH — Bulk Student Import Template'],
+  [''],
+  ['HOW TO USE:'],
+  ['1. Fill in the Students sheet — one student per row.'],
+  ['2. Use the Class column dropdown to select the correct class.'],
+  ['3. Gender must be Male or Female (use the dropdown).'],
+  ['4. DOB format: YYYY-MM-DD (e.g. 2015-03-10). Leave blank if unknown.'],
+  ['5. T1/T2/T3 Fees are optional — leave blank and the system uses your class fee rates.'],
+  ['6. Contact should be a valid Ghana phone number (e.g. 0244123456).'],
+  ['7. Save the file and upload it in the app under Students → Bulk Admission.'],
+  [''],
+  ['COLUMN GUIDE:'],
+  ['Name','Full name of the student (required)'],
+  ['Class','Select from dropdown — must match your school classes exactly'],
+  ['Gender','Male or Female'],
+  ['DOB','Date of birth in YYYY-MM-DD format'],
+  ['Parent/Guardian','Name of parent or guardian'],
+  ['Contact','Phone number of parent'],
+  ['T1 Fee','Term 1 school fees (leave blank to auto-fill from class rates)'],
+  ['T2 Fee','Term 2 school fees'],
+  ['T3 Fee','Term 3 school fees'],
+  [''],
+  ['CLASSES IN YOUR SCHOOL:'],
+ ].concat(CLASSES.map(function(c,i){return [i+1+'. '+c];}));
+
+ var wsInstr = XLSX.utils.aoa_to_sheet(instructions);
+ wsInstr['!cols'] = [{wch:40},{wch:60}];
+ XLSX.utils.book_append_sheet(wb, wsInstr, 'Instructions');
+
+ // Download
+ var fname = (SETTINGS.schoolName||'School').replace(/[^a-zA-Z0-9]/g,'_')+'_Bulk_Import_Template.xlsx';
+ XLSX.writeFile(wb, fname);
+ toast('Template downloaded with class dropdown validation', 'success');
 }
 
 // Handle file import (CSV / Excel / Word) 
@@ -5658,59 +5745,86 @@ async function handleBulkFileImport(input){
  document.getElementById('bulkFileName').textContent = file.name;
  const statusEl = document.getElementById('bulkImportStatus');
  statusEl.style.display = 'block';
- statusEl.innerHTML = '<span style="color:var(--accent);"> Reading file...</span>';
+ statusEl.innerHTML = '<span style="color:var(--accent);">Reading file...</span>';
 
  try {
+ // Size guard — 5MB max to prevent mobile crashes
+ if(file.size > 5 * 1024 * 1024){
+  statusEl.innerHTML = '<span style="color:var(--red);">File too large. Max 5MB. Split into smaller batches.</span>';
+  return;
+ }
+
  const ext = file.name.split('.').pop().toLowerCase();
  let rows = [];
 
  if(ext === 'csv'){
- rows = await parseCSV(file);
+  rows = await parseCSV(file);
  } else if(ext === 'xlsx' || ext === 'xls'){
- rows = await parseExcel(file);
+  rows = await parseExcel(file);
  } else if(ext === 'docx'){
- rows = await parseWord(file);
+  rows = await parseWord(file);
  } else {
- statusEl.innerHTML = '<span style="color:var(--red);"> Unsupported file type. Use CSV, XLSX, XLS or DOCX.</span>';
- return;
+  statusEl.innerHTML = '<span style="color:var(--red);">Unsupported file type. Use CSV, XLSX or XLS.</span>';
+  return;
  }
 
  if(!rows.length){
- statusEl.innerHTML = '<span style="color:var(--red);"> No data found in file.</span>';
- return;
+  statusEl.innerHTML = '<span style="color:var(--red);">No student data found. Check your file has a Name column.</span>';
+  return;
  }
 
- // Load rows into the bulk table
+ // Cap at 500 rows to prevent stack overflow on mobile
+ const MAX_ROWS = 500;
+ if(rows.length > MAX_ROWS){
+  rows = rows.slice(0, MAX_ROWS);
+  statusEl.innerHTML = '<span style="color:var(--gold);">Large file — showing first 500 students. Add in batches if more.</span>';
+ }
+
  const defaultClass = document.getElementById('bulkClass').value || CLASSES[0];
  let added = 0;
- rows.forEach(r => {
- if(!r.name) return;
- const row = {
- id: ++bulkRowCounter,
- name: r.name || '',
- class_: r.class_ || defaultClass,
- gender: r.gender || 'Male',
- dob: r.dob || '',
- parent: r.parent || '',
- contact: r.contact || '',
- t1f: parseFloat(r.t1f)||0,
- t2f: parseFloat(r.t2f)||0,
- t3f: parseFloat(r.t3f)||0,
- };
- // Auto-fill fees from class rates if not in file
- if(!row.t1f && !row.t2f && !row.t3f){
- const rates = (SETTINGS.classFeeRates&&SETTINGS.classFeeRates[row.class_])||{t1:SETTINGS.t1Default||0,t2:SETTINGS.t2Default||0,t3:SETTINGS.t3Default||0};
- row.t1f=rates.t1; row.t2f=rates.t2; row.t3f=rates.t3;
- }
- bulkRows.push(row);
- added++;
+ rows.forEach(function(r){
+  if(!r.name) return;
+  // Auto-classify: use class from file → detect from name pattern → default
+  var detectedClass = r.class_ || '';
+  if(!detectedClass){
+   // Try to detect class from name field (e.g. "Primary 1 - Kofi" or "KG1 Ama")
+   var nameCheck = (r.name||'').toLowerCase();
+   var matched = CLASSES.find(function(c){
+    return nameCheck.indexOf(c.toLowerCase()) !== -1;
+   });
+   if(matched){ detectedClass = matched; r.name = r.name.replace(new RegExp(matched,'i'),'').replace(/^[-–,\s]+|[-–,\s]+$/g,'').trim(); }
+   else { detectedClass = defaultClass; }
+  }
+  var row = {
+   id: ++bulkRowCounter,
+   name: r.name || '',
+   class_: detectedClass,
+   gender: r.gender || 'Male',
+   dob: r.dob || '',
+   parent: r.parent || '',
+   contact: r.contact || '',
+   t1f: parseFloat(r.t1f)||0,
+   t2f: parseFloat(r.t2f)||0,
+   t3f: parseFloat(r.t3f)||0,
+  };
+  if(!row.t1f && !row.t2f && !row.t3f){
+   var rates = (SETTINGS.classFeeRates&&SETTINGS.classFeeRates[row.class_])||{t1:0,t2:0,t3:0};
+   row.t1f=rates.t1; row.t2f=rates.t2; row.t3f=rates.t3;
+  }
+  bulkRows.push(row);
+  added++;
  });
 
- renderBulkTable();
- statusEl.innerHTML = `<span style="color:var(--green);"> ${added} students loaded from file. Review below and click "Add All Students".</span>`;
+ // Use setTimeout to yield to browser before rendering large table
+ statusEl.innerHTML = '<span style="color:var(--accent);">Preparing table...</span>';
+ setTimeout(function(){
+  renderBulkTable();
+  statusEl.innerHTML = '<span style="color:var(--green);">' + added + ' students loaded. Review and click "Add All Students".</span>';
+ }, 50);
+
  } catch(e) {
- statusEl.innerHTML = `<span style="color:var(--red);"> Error reading file: ${e.message}</span>`;
- console.error(e);
+ statusEl.innerHTML = '<span style="color:var(--red);">Error reading file: ' + e.message + '</span>';
+ console.error('Bulk import error:', e);
  }
 }
 
@@ -5812,35 +5926,58 @@ async function parseWord(file){
 
 // Map column headers to field names 
 function buildColMap(header){
- const map = {};
- header.forEach((h,i)=>{
- if(/name|fullname|studentname/.test(h)) map.name=i;
- else if(/class|grade|level/.test(h)) map.class_=i;
- else if(/gender|sex/.test(h)) map.gender=i;
- else if(/dob|birth|date/.test(h)) map.dob=i;
- else if(/parent|guardian|father|mother/.test(h)) map.parent=i;
- else if(/contact|phone|tel|mobile/.test(h)) map.contact=i;
- else if(/t1|term1|termone|fee1/.test(h)) map.t1f=i;
- else if(/t2|term2|termtwo|fee2/.test(h)) map.t2f=i;
- else if(/t3|term3|termthree|fee3/.test(h)) map.t3f=i;
+ var map = {};
+ header.forEach(function(h,i){
+  var hc = h.toLowerCase().replace(/[^a-z0-9]/g,'');
+  if(/name|fullname|studentname/.test(hc)) map.name=i;
+  else if(/class|grade|level|stream/.test(hc)) map.class_=i;
+  else if(/gender|sex/.test(hc)) map.gender=i;
+  else if(/dob|birth|dateofbirth/.test(hc)) map.dob=i;
+  else if(/parent|guardian|father|mother|nextofkin/.test(hc)) map.parent=i;
+  else if(/contact|phone|tel|mobile|number/.test(hc)) map.contact=i;
+  else if(/t1fee|term1fee|termone|t1|fee1|term1/.test(hc)) map.t1f=i;
+  else if(/t2fee|term2fee|termtwo|t2|fee2|term2/.test(hc)) map.t2f=i;
+  else if(/t3fee|term3fee|termthree|t3|fee3|term3/.test(hc)) map.t3f=i;
  });
- // Fallback: first col is name if not mapped
+ // Fallback: first col is name, second is class
  if(map.name===undefined) map.name=0;
  if(map.class_===undefined) map.class_=1;
  return map;
 }
 
+function normaliseClass(raw){
+ // Match raw class string to known CLASSES (case-insensitive, flexible spacing)
+ if(!raw) return '';
+ var clean = raw.trim();
+ // Direct match
+ var direct = CLASSES.find(function(c){ return c.toLowerCase()===clean.toLowerCase(); });
+ if(direct) return direct;
+ // Fuzzy: remove spaces and compare
+ var cleanNorm = clean.toLowerCase().replace(/\s+/g,'');
+ var fuzzy = CLASSES.find(function(c){ return c.toLowerCase().replace(/\s+/g,'')===cleanNorm; });
+ if(fuzzy) return fuzzy;
+ // Partial: class contains the raw string or vice versa
+ var partial = CLASSES.find(function(c){
+  var cn = c.toLowerCase(); var rn = clean.toLowerCase();
+  return cn.indexOf(rn)!==-1 || rn.indexOf(cn)!==-1;
+ });
+ if(partial) return partial;
+ // Return as-is if no match — user can correct in preview
+ return clean;
+}
+
 function extractRow(cols, colMap){
+ var rawClass = cols[colMap.class_]||'';
  return {
- name: cols[colMap.name]||'',
- class_: cols[colMap.class_]||'',
- gender: cols[colMap.gender]||'Male',
- dob: cols[colMap.dob]||'',
- parent: cols[colMap.parent]||'',
- contact: cols[colMap.contact]||'',
- t1f: parseFloat(cols[colMap.t1f])||0,
- t2f: parseFloat(cols[colMap.t2f])||0,
- t3f: parseFloat(cols[colMap.t3f])||0,
+  name:    cols[colMap.name]||'',
+  class_:  normaliseClass(rawClass),
+  gender:  /female|f/i.test(cols[colMap.gender]||'') ? 'Female' : 'Male',
+  dob:     cols[colMap.dob]||'',
+  parent:  cols[colMap.parent]||'',
+  contact: cols[colMap.contact]||'',
+  t1f:     parseFloat(cols[colMap.t1f])||0,
+  t2f:     parseFloat(cols[colMap.t2f])||0,
+  t3f:     parseFloat(cols[colMap.t3f])||0,
  };
 }
 
@@ -5906,7 +6043,7 @@ function bulkUpdateClass(){
 }
 
 function bulkRemoveRow(rowId){
- bulkRows = bulkRows.filter(r=>r.rowId!==rowId);
+ bulkRows = bulkRows.filter(function(r){return r.id!==rowId;});
  renderBulkTable();
 }
 
@@ -5927,7 +6064,7 @@ function bulkReadRow(rowId){
 
 function updateBulkCount(){
  // read all rows first
- bulkRows.forEach(r=>bulkReadRow(r.rowId));
+ bulkRows.forEach(function(r){bulkReadRow(r.id);});
  const valid = bulkRows.filter(r=>r.name.trim()).length;
  const el = document.getElementById('bulkRowCount');
  if(el) el.textContent = `${valid} of ${bulkRows.length} rows have names and will be saved`;
@@ -5935,41 +6072,40 @@ function updateBulkCount(){
 }
 
 function renderBulkTable(){
- const tbody = document.getElementById('bulkTableBody');
+ var tbody = document.getElementById('bulkTableBody');
  if(!tbody) return;
- tbody.innerHTML = bulkRows.map((r,i)=>`
- <tr style="border-top:1px solid var(--border);">
- <td style="padding:6px 8px;color:var(--text3);font-size:11px;">${i+1}</td>
- <td style="padding:4px 6px;"><input id="br_name_${r.rowId}" value="${r.name}" placeholder="Full name" oninput="bulkReadRow(${r.rowId})"
- style="width:140px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Sora',sans-serif;font-size:12px;"></td>
- <td style="padding:4px 6px;"><select id="br_cls_${r.rowId}" onchange="bulkReadRow(${r.rowId})"
- style="padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Sora',sans-serif;font-size:12px;">
- ${CLASSES.map(c=>`<option ${c===r.class_?'selected':''}>${c}</option>`).join('')}
- </select></td>
- <td style="padding:4px 6px;"><select id="br_gen_${r.rowId}" onchange="bulkReadRow(${r.rowId})"
- style="padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Sora',sans-serif;font-size:12px;">
- <option ${r.gender==='Male'?'selected':''}>Male</option><option ${r.gender==='Female'?'selected':''}>Female</option>
- </select></td>
- <td style="padding:4px 6px;"><input type="date" id="br_dob_${r.rowId}" value="${r.dob}" oninput="bulkReadRow(${r.rowId})"
- style="padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Sora',sans-serif;font-size:12px;"></td>
- <td style="padding:4px 6px;"><input id="br_par_${r.rowId}" value="${r.parent}" placeholder="Parent name" oninput="bulkReadRow(${r.rowId})"
- style="width:120px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Sora',sans-serif;font-size:12px;"></td>
- <td style="padding:4px 6px;"><input id="br_con_${r.rowId}" value="${r.contact}" placeholder="0XX..." oninput="bulkReadRow(${r.rowId})"
- style="width:110px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Sora',sans-serif;font-size:12px;"></td>
- <td style="padding:4px 6px;"><input type="number" id="br_t1_${r.rowId}" value="${r.t1f}" oninput="bulkReadRow(${r.rowId})"
- style="width:72px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;"></td>
- <td style="padding:4px 6px;"><input type="number" id="br_t2_${r.rowId}" value="${r.t2f}" oninput="bulkReadRow(${r.rowId})"
- style="width:72px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;"></td>
- <td style="padding:4px 6px;"><input type="number" id="br_t3_${r.rowId}" value="${r.t3f}" oninput="bulkReadRow(${r.rowId})"
- style="width:72px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;"></td>
- <td style="padding:4px 6px;"><button onclick="bulkRemoveRow(${r.rowId})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:4px;"></button></td>
- </tr>`).join('');
+ // Build HTML in chunks to avoid call stack overflow on mobile
+ var clsOptions = CLASSES.map(function(c){ return '<option>'+c+'</option>'; }).join('');
+ var chunks = [];
+ for(var i=0;i<bulkRows.length;i++){
+  var r = bulkRows[i];
+  // Build class select with selected option
+  var clsSel = CLASSES.map(function(c){
+   return '<option'+(c===r.class_?' selected':'')+'>'+c+'</option>';
+  }).join('');
+  chunks.push(
+   '<tr style="border-top:1px solid var(--border);">'
+   +'<td style="padding:6px 8px;color:var(--text3);font-size:11px;">'+(i+1)+'</td>'
+   +'<td style="padding:4px 6px;"><input id="br_name_'+r.id+'" value="'+r.name.replace(/"/g,'&quot;')+'" placeholder="Full name" oninput="bulkReadRow('+r.id+')" style="width:130px;padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
+   +'<td style="padding:4px 6px;"><select id="br_cls_'+r.id+'" onchange="bulkReadRow('+r.id+')" style="padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;">'+clsSel+'</select></td>'
+   +'<td style="padding:4px 6px;"><select id="br_gen_'+r.id+'" onchange="bulkReadRow('+r.id+')" style="padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"><option'+(r.gender==='Male'?' selected':'')+'>Male</option><option'+(r.gender==='Female'?' selected':'')+'>Female</option></select></td>'
+   +'<td style="padding:4px 6px;"><input type="date" id="br_dob_'+r.id+'" value="'+r.dob+'" oninput="bulkReadRow('+r.id+')" style="padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
+   +'<td style="padding:4px 6px;"><input id="br_par_'+r.id+'" value="'+r.parent.replace(/"/g,'&quot;')+'" placeholder="Parent" oninput="bulkReadRow('+r.id+')" style="width:110px;padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
+   +'<td style="padding:4px 6px;"><input id="br_con_'+r.id+'" value="'+r.contact+'" placeholder="0XX..." oninput="bulkReadRow('+r.id+')" style="width:100px;padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
+   +'<td style="padding:4px 6px;"><input type="number" id="br_t1_'+r.id+'" value="'+r.t1f+'" oninput="bulkReadRow('+r.id+')" style="width:68px;padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
+   +'<td style="padding:4px 6px;"><input type="number" id="br_t2_'+r.id+'" value="'+r.t2f+'" oninput="bulkReadRow('+r.id+')" style="width:68px;padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
+   +'<td style="padding:4px 6px;"><input type="number" id="br_t3_'+r.id+'" value="'+r.t3f+'" oninput="bulkReadRow('+r.id+')" style="width:68px;padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;"></td>'
+   +'<td style="padding:4px 6px;"><button onclick="bulkRemoveRow('+r.id+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:4px;"></button></td>'
+   +'</tr>'
+  );
+ }
+ tbody.innerHTML = chunks.join('');
  updateBulkCount();
 }
 
 function saveBulkStudents(){
  // Flush all inputs
- bulkRows.forEach(r=>bulkReadRow(r.rowId));
+ bulkRows.forEach(function(r){bulkReadRow(r.id);});
  const valid = bulkRows.filter(r=>r.name.trim());
  if(!valid.length){toast('Please enter at least one student name','error');return;}
 
