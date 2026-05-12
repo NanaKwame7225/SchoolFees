@@ -2331,20 +2331,22 @@
 
 
  <!-- LEVIES -->
- <div class="page" id="page-levies" style="padding-top:0;">
- <!-- Levies compact header -->
- <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-  <div>
-   <div style="font-size:18px;font-weight:800;color:var(--text);">Levies &amp; Extra Charges</div>
-   <div style="font-size:12px;color:var(--text3);">Textbooks, Stationery, PTA, Uniform, Excursion &amp; more</div>
+ <div class="page" id="page-levies">
+  <div class="page-header" style="margin:0 0 12px 0;padding:0;">
+   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
+     <h2 style="margin:0;line-height:1.1;">Levies &amp; Extra Charges</h2>
+     <p style="margin:0;font-size:12px;color:var(--text2);">Textbooks, Stationery, PTA, Uniform, Excursion &amp; more</p>
+    </div>
+    <!-- Tabs inline with header -->
+    <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;flex-wrap:wrap;">
+     <button id="levyTab_assign" onclick="switchLevyTab('assign')" style="padding:6px 14px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Assign Levies</button>
+     <button id="levyTab_pay" onclick="switchLevyTab('pay')" style="padding:6px 14px;border:none;border-radius:8px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Record Payment</button>
+     <button id="levyTab_report" onclick="switchLevyTab('report')" style="padding:6px 14px;border:none;border-radius:8px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Levy Report</button>
+     <button id="levyTab_types" onclick="switchLevyTab('types')" style="padding:6px 14px;border:none;border-radius:8px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Manage Types</button>
+    </div>
+   </div>
   </div>
-  <div style="display:flex;gap:3px;background:var(--surface2);border-radius:10px;padding:4px;flex-wrap:wrap;">
-   <button id="levyTab_assign" onclick="switchLevyTab('assign')" style="padding:7px 16px;border:none;border-radius:7px;background:var(--accent);color:#fff;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Assign Levies</button>
-   <button id="levyTab_pay" onclick="switchLevyTab('pay')" style="padding:7px 16px;border:none;border-radius:7px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Record Payment</button>
-   <button id="levyTab_report" onclick="switchLevyTab('report')" style="padding:7px 16px;border:none;border-radius:7px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Levy Report</button>
-   <button id="levyTab_types" onclick="switchLevyTab('types')" style="padding:7px 16px;border:none;border-radius:7px;background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Manage Types</button>
-  </div>
- </div>
  <!-- ASSIGN LEVIES -->
  <div id="levyPanel_assign">
  <div class="card" style="margin-bottom:16px;">
@@ -6507,7 +6509,7 @@ function switchLevyTab(tab){
  const btn = document.getElementById('levyTab_'+t);
  const pnl = document.getElementById('levyPanel_'+t);
  const active = t===tab;
- if(btn){ btn.style.background=active?'var(--accent)':'transparent'; btn.style.color=active?'#000':'var(--text3)'; }
+ if(btn){ btn.style.background=active?'var(--accent)':'transparent'; btn.style.color=active?'#fff':'var(--text3)'; }
  if(pnl) pnl.style.display=active?'':'none';
  });
  if(tab==='report') renderLevyReport();
