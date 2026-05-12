@@ -399,6 +399,8 @@
  #page-levies.active { padding-top:0 !important; margin-top:0 !important; }
  #page-levies.active > .page-header { margin-top:0 !important; padding-top:0 !important; }
  .content:has(> #page-levies.active), .content:has(#page-levies.active) { padding-top:0 !important; }
+ /* Levies overrides — kill all top space */
+ #page-levies { margin-top:0 !important; padding-top:0 !important; }
  /* Pull levies content up to eliminate dead space at top */
  .content:has(#page-levies.active) { padding-top:0 !important; }
  #page-levies .page-header { margin-top:0 !important; padding-top:0 !important; }
@@ -2337,7 +2339,7 @@
 
 
  <!-- LEVIES -->
- <div class="page" id="page-levies" style="margin-top:-14px;padding-top:0 !important;">
+ <div class="page" id="page-levies" style="margin-top:0;padding-top:0;">
   <div class="page-header" style="margin:0 0 12px 0;padding:0;">
    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
     <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
@@ -3392,6 +3394,9 @@ function buildAdvModeFilter(){
 
 // ===================== PAGES =====================
 function showPage(p){
+ // Restore content padding before switching (levies sets it to 0)
+ var cEl = document.querySelector('.content');
+ if(cEl) cEl.style.paddingTop = '';
  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
  document.getElementById('page-'+p).classList.add('active');
@@ -3412,7 +3417,12 @@ function showPage(p){
  if(p==='payslip'){ document.getElementById('payslipSearch').value=''; document.getElementById('payslipResults').innerHTML=''; document.getElementById('payslipPeriodSelect').style.display='none'; document.getElementById('payslipDisplayWrap').style.display='none'; }
  if(p==='promote') initPromotePage();
  if(p==='settings'){ buildSettingsForm(); renderStorageStatus(); }
- if(p==='levies') initLeviesPage();
+ if(p==='levies'){
+  initLeviesPage();
+  // Kill content area top padding for levies so header starts at the very top
+  var cEl = document.querySelector('.content');
+  if(cEl) cEl.style.paddingTop = '0';
+ }
  if(p==='yearrollover') initYearRolloverPage();
  if(p==='parentportal') initParentPortal();
  if(p==='help') renderHelpManual();
